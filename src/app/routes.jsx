@@ -14,6 +14,12 @@ const AppEchart = Loadable(lazy(() => import("app/views/charts/echarts/AppEchart
 // DASHBOARD PAGE
 const Analytics = Loadable(lazy(() => import("app/views/dashboard/Analytics")));
 
+const UserList = Loadable(lazy(() => import("app/views/users/UserList")))
+
+const EventList = Loadable(lazy(() => import("app/views/events/EventList")))
+
+const EventCreate = Loadable(lazy(() => import("app/views/events/EventCreate.jsx")))
+
 const routes = [
   { path: "/", element: <Navigate to="dashboard/default" /> },
   {
@@ -27,8 +33,15 @@ const routes = [
       // dashboard route
       { path: "/dashboard/default", element: <Analytics />, auth: authRoles.admin },
       // e-chart route
-      { path: "/charts/echarts", element: <AppEchart />, auth: authRoles.editor }
-    ]
+      { path: "/charts/echarts", element: <AppEchart />, auth: authRoles.editor },
+
+      {path: "/users", element: <UserList/>, auth: authRoles.admin},
+
+      {path: "/events", element: <EventList />},
+
+      {path: "/events/create", element: <EventCreate/>},
+      
+    ],
   },
 
   // session pages route

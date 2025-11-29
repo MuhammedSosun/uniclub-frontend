@@ -10,7 +10,7 @@ import {
   Typography,
   Box,
 } from "@mui/material";
-import { getAllEvents } from "app/services/eventService";
+import eventService from "app/services/eventService";
 import { toast } from "react-toastify";
 
 export default function EventList() {
@@ -23,8 +23,8 @@ export default function EventList() {
 
   const loadEvents = async () => {
     try {
-      const data = await getAllEvents();
-      setEvents(data.payload || []);
+      const res = await eventService.getAllEvents();
+      setEvents(res.payload || []);
     } catch (err) {
       toast.error("Etkinlikler yüklenirken hata oluştu!");
     }
@@ -33,9 +33,10 @@ export default function EventList() {
   const handleFilterChange = async (e) => {
     const value = e.target.value;
     setFilter(value);
+
     try {
-      const data = await getAllEvents(value);
-      setEvents(data.payload || []);
+      const res = await eventService.searchEvents(value);
+      setEvents(res.payload || []);
     } catch (err) {
       toast.error("Filtreleme sırasında hata oluştu!");
     }
@@ -71,14 +72,9 @@ export default function EventList() {
         <TableBody>
           {events.length > 0 ? (
             events.map((e) => (
-              <TableRow
-                key={e.id}
-                hover
-                sx={{
-                  "&:hover": { backgroundColor: "#fafafa" },
-                }}
-              >
+              <TableRow key={e.id} hover sx={{ "&:hover": { backgroundColor: "#fafafa" } }}>
                 <TableCell>{e.title}</TableCell>
+
                 <TableCell>
                   {new Date(e.eventDate).toLocaleString("tr-TR", {
                     day: "2-digit",
@@ -88,7 +84,9 @@ export default function EventList() {
                     minute: "2-digit",
                   })}
                 </TableCell>
+
                 <TableCell>{e.location || "—"}</TableCell>
+
                 <TableCell>
                   {e.description
                     ? e.description.length > 40
@@ -96,7 +94,9 @@ export default function EventList() {
                       : e.description
                     : "—"}
                 </TableCell>
+
                 <TableCell>{e.createdBy || "—"}</TableCell>
+
                 <TableCell>
                   {new Date(e.createdAt).toLocaleDateString("tr-TR")}
                 </TableCell>

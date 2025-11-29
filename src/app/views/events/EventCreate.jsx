@@ -1,32 +1,65 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   TextField,
   Typography,
   Button,
   Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  OutlinedInput,
+  Checkbox,
+  ListItemText,
 } from "@mui/material";
-import { createEvent } from "app/services/eventService";
+import eventService from "app/services/eventService";
+import clubService from "app/services/clubService";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 
 export default function EventCreate() {
   const navigate = useNavigate();
+
   const [form, setForm] = useState({
     title: "",
     description: "",
     eventDate: "",
     location: "",
+    clubIds: [],  // ✔ DTO’ya uygun hale getirildi
   });
 
+  const [clubs, setClubs] = useState([]);
+
+  useEffect(() => {
+    loadClubs();
+  }, []);
+
+  const loadClubs = async () => {
+    try {
+      const res = await clubService.getAllPaged({
+        pageNumber: 0,
+        pageSize: 100,
+      });
+      setClubs(res.payload.items || []);
+    } catch (err) {
+      toast.error("Kulüpler yüklenemedi!");
+    }
+  };
+
   const handleSubmit = async () => {
-    if (!form.title || !form.eventDate) {
-      toast.warning("Etkinlik adı ve tarih zorunludur!");
+    if (!form.title || !form.eventDate || !form.location) {
+      toast.warning("Etkinlik adı, tarih ve konum zorunludur!");
+      return;
+    }
+
+    if (form.clubIds.length === 0) {
+      toast.warning("En az bir kulüp seçmelisiniz!");
       return;
     }
 
     try {
-      await createEvent(form);
+      await eventService.createEvent(form);
       toast.success("Etkinlik başarıyla oluşturuldu!");
       navigate("/events");
     } catch (err) {
@@ -47,6 +80,7 @@ export default function EventCreate() {
           onChange={(e) => setForm({ ...form, title: e.target.value })}
           required
         />
+
         <TextField
           label="Açıklama"
           multiline
@@ -54,26 +88,53 @@ export default function EventCreate() {
           value={form.description}
           onChange={(e) => setForm({ ...form, description: e.target.value })}
         />
+
         <TextField
-  label="Etkinlik Tarihi"
-  type="datetime-local"
-  InputLabelProps={{ shrink: true }}
-  inputProps={{ min: new Date().toISOString().slice(0, 16) }}
-  value={form.eventDate}
-  onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
-  required
-/>
+          label="Etkinlik Tarihi"
+          type="datetime-local"
+          InputLabelProps={{ shrink: true }}
+          inputProps={{ min: new Date().toISOString().slice(0, 16) }} // @Future validasyonu için
+          value={form.eventDate}
+          onChange={(e) => setForm({ ...form, eventDate: e.target.value })}
+          required
+        />
 
         <TextField
           label="Konum"
           value={form.location}
           onChange={(e) => setForm({ ...form, location: e.target.value })}
+          required
         />
+
+        {/* ✔ Kulüpler İçin Çoklu Seçim */}
+        <FormControl fullWidth>
+          <InputLabel>Kulüpler</InputLabel>
+          <Select
+            multiple
+            value={form.clubIds}
+            onChange={(e) => setForm({ ...form, clubIds: e.target.value })}
+            input={<OutlinedInput label="Kulüpler" />}
+            renderValue={(selected) =>
+              clubs
+                .filter((club) => selected.includes(club.id))
+                .map((club) => club.name)
+                .join(", ")
+            }
+          >
+            {clubs.map((club) => (
+              <MenuItem key={club.id} value={club.id}>
+                <Checkbox checked={form.clubIds.includes(club.id)} />
+                <ListItemText primary={club.name} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         <Stack direction="row" spacing={2} mt={2}>
           <Button variant="contained" color="primary" onClick={handleSubmit}>
             Oluştur
           </Button>
+
           <Button variant="outlined" onClick={() => navigate("/events")}>
             Vazgeç
           </Button>

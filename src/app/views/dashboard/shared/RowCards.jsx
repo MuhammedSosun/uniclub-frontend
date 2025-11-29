@@ -1,94 +1,115 @@
-import { Fragment } from "react";
-
-import Box from "@mui/material/Box";
-import Fab from "@mui/material/Fab";
-import Card from "@mui/material/Card";
-import Grid from "@mui/material/Grid2";
-import Avatar from "@mui/material/Avatar";
-import Checkbox from "@mui/material/Checkbox";
-import IconButton from "@mui/material/IconButton";
+import { useEffect, useState } from "react";
+import {
+  Card,
+  Box,
+  Grid,
+  Avatar,
+  Typography,
+  IconButton,
+} from "@mui/material";
 import { styled } from "@mui/material/styles";
-import MoreVert from "@mui/icons-material/MoreVert";
-import DateRange from "@mui/icons-material/DateRange";
-import StarOutline from "@mui/icons-material/StarOutline";
-import format from "date-fns/format";
-import { Span } from "app/components/Typography";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import eventService from "app/services/eventService";
 
-// STYLED COMPONENTS
-const ProjectName = styled(Span)(({ theme }) => ({
-  marginLeft: 24,
-  fontWeight: "500",
-  [theme.breakpoints.down("sm")]: { marginLeft: 4 }
+// CARD STYLE
+const ClubCard = styled(Card)(({ theme }) => ({
+  padding: "16px 22px",
+  borderRadius: 14,
+  boxShadow: "0px 2px 10px rgba(0,0,0,0.08)",
+  transition: "all .25s ease",
+  cursor: "pointer",
+  "&:hover": {
+    transform: "translateY(-3px)",
+    boxShadow: "0px 6px 22px rgba(0,0,0,0.12)",
+  },
 }));
 
-const StyledFabStar = styled(Fab)(({ theme }) => ({
-  marginLeft: 0,
-  boxShadow: "none",
-  background: "#08ad6c !important",
-  backgroundColor: "rgba(9, 182, 109, 1) !important",
-  [theme.breakpoints.down("sm")]: { display: "none" }
-}));
-
-const StyledFab = styled(Fab)(({ theme }) => ({
-  marginLeft: 0,
-  boxShadow: "none",
-  color: "white !important",
-  background: `${theme.palette.error.main} !important`,
-  [theme.breakpoints.down("sm")]: { display: "none" }
-}));
-
-const StyledAvatar = styled(Avatar)(() => ({
-  width: "32px !important",
-  height: "32px !important"
+// Badge style
+const Badge = styled("div")(({ theme }) => ({
+  background: theme.palette.primary.main,
+  color: "white",
+  padding: "4px 10px",
+  fontSize: 12,
+  borderRadius: 8,
+  fontWeight: 600,
+  display: "inline-block",
+  whiteSpace: "nowrap",
 }));
 
 export default function RowCards() {
-  return [1, 2, 3, 4].map((id) => (
-    <Fragment key={id}>
-      <Card sx={{ py: 1, px: 2 }} className="project-card">
-        <Grid container alignItems="center">
-          <Grid size={{ md: 5, xs: 7 }}>
-            <Box display="flex" alignItems="center">
-              <Checkbox />
+  const [clubs, setClubs] = useState([]);
 
-              {id % 2 === 1 ? (
-                <StyledFabStar size="small">
-                  <StarOutline />
-                </StyledFabStar>
-              ) : (
-                <StyledFab size="small">
-                  <DateRange />
-                </StyledFab>
-              )}
+  const loadTopClubs = async () => {
+    try {
+      const res = await eventService.getTopActiveClubsLast3Months();
+      setClubs(res?.payload ?? []);
+    } catch (err) {
+      console.error("TOP CLUBS ERROR:", err);
+    }
+  };
 
-              <ProjectName>Project {id}</ProjectName>
-            </Box>
-          </Grid>
+  useEffect(() => {
+    loadTopClubs();
+  }, []);
 
-          <Grid size={{ md: 3, xs: 4 }}>
-            <Box color="text.secondary">{format(new Date().getTime(), "MM/dd/yyyy hh:mma")}</Box>
-          </Grid>
+  return (
+    <Grid container spacing={2} sx={{ mt: 1 }}>
+      {clubs.map((club, i) => (
+        <Grid item xs={12} key={i}>
+          <ClubCard>
+            <Grid container alignItems="center">
+              
+              {/* LEFT SIDE */}
+              <Grid item xs={8} sm={9}>
+                <Box display="flex" alignItems="center" gap={2}>
+                  
+                  <Avatar
+                    sx={{
+                      bgcolor: "primary.main",
+                      width: 46,
+                      height: 46,
+                      fontSize: 20,
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {club.clubName.charAt(0)}
+                  </Avatar>
 
-          <Grid size={3} sx={{ display: { xs: "none", sm: "block" } }}>
-            <Box display="flex" position="relative" marginLeft="-0.875rem !important">
-              <StyledAvatar src="/assets/images/face-4.jpg" />
-              <StyledAvatar src="/assets/images/face-4.jpg" />
-              <StyledAvatar src="/assets/images/face-4.jpg" />
-              <StyledAvatar sx={{ fontSize: "14px" }}>+3</StyledAvatar>
-            </Box>
-          </Grid>
+                  <Box>
+                    <Typography variant="h6" fontWeight={600}>
+                      {club.clubName}
+                    </Typography>
 
-          <Grid size={1}>
-            <Box display="flex" justifyContent="flex-end">
-              <IconButton>
-                <MoreVert />
-              </IconButton>
-            </Box>
-          </Grid>
+                    <Typography variant="body2" color="text.secondary">
+                      Son 3 ayda en aktif kulüplerden biri
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+
+              {/* RIGHT SIDE */}
+              <Grid
+                item
+                xs={4}
+                sm={3}
+                display="flex"
+                justifyContent="flex-end"
+                alignItems="center"
+                gap={2}
+              >
+                <Badge>
+                  {club.eventCount} etkinlik
+                </Badge>
+
+                <IconButton>
+                  <MoreVertIcon />
+                </IconButton>
+              </Grid>
+            </Grid>
+          </ClubCard>
         </Grid>
-      </Card>
-
-      <Box py={1} />
-    </Fragment>
-  ));
+      ))}
+    </Grid>
+  );
 }

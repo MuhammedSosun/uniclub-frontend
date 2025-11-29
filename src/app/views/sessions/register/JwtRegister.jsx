@@ -10,11 +10,12 @@ import TextField from "@mui/material/TextField";
 import styled from "@mui/material/styles/styled";
 import useTheme from "@mui/material/styles/useTheme";
 import LoadingButton from "@mui/lab/LoadingButton";
+import JustifyBox from "app/components/JustifyBox";
 
 import useAuth from "app/hooks/useAuth";
 import { Paragraph } from "app/components/Typography";
 
-// STYLED COMPONENTS
+// ✅ Görsel yapı
 const ContentBox = styled("div")(() => ({
   height: "100%",
   padding: "32px",
@@ -37,20 +38,25 @@ const JWTRegister = styled(JustifyBox)(() => ({
   }
 }));
 
-// initial login credentials
+// ✅ Başlangıç değerleri (sadece email ve password)
 const initialValues = {
   email: "",
   password: "",
-  username: "",
   remember: true
 };
 
-// form field validation schema
+// ✅ Validasyon (email zorunlu, password min. 6 karakter)
 const validationSchema = Yup.object().shape({
+ email: Yup.string()
+  .matches(
+    /^[0-9]{9}@ogrenci\.yalova\.edu\.tr$/,
+    "Geçerli bir öğrenci e-postası girin (ör: 210201056@ogrenci.yalova.edu.tr)"
+  )
+  .required("E-posta zorunludur!"),
+
   password: Yup.string()
-    .min(6, "Password must be 6 character length")
-    .required("Password is required!"),
-  email: Yup.string().email("Invalid Email address").required("Email is required!")
+    .min(6, "Şifre en az 6 karakter olmalıdır")
+    .required("Şifre zorunludur!")
 });
 
 export default function JwtRegister() {
@@ -58,12 +64,14 @@ export default function JwtRegister() {
   const { register } = useAuth();
   const navigate = useNavigate();
 
-  const handleFormSubmit = (values) => {
+  const handleFormSubmit = async (values, { setSubmitting }) => {
     try {
-      register(values.email, values.username, values.password);
-      navigate("/");
+      await register(values.email, values.password);
+      navigate("/session/signin"); // ✅ Login sayfasına yönlendir
     } catch (e) {
-      console.log(e);
+      console.error("Register error:", e);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -71,6 +79,7 @@ export default function JwtRegister() {
     <JWTRegister>
       <Card className="card">
         <Grid container>
+          {/* Sol taraf: görsel */}
           <Grid size={{ md: 6, xs: 12 }}>
             <ContentBox>
               <img
@@ -81,6 +90,7 @@ export default function JwtRegister() {
             </ContentBox>
           </Grid>
 
+          {/* Sağ taraf: form */}
           <Grid size={{ md: 6, xs: 12 }}>
             <Box p={4} height="100%">
               <Formik
@@ -97,27 +107,13 @@ export default function JwtRegister() {
                   handleSubmit
                 }) => (
                   <form onSubmit={handleSubmit}>
-                    <TextField
-                      fullWidth
-                      size="small"
-                      type="text"
-                      name="username"
-                      label="Username"
-                      variant="outlined"
-                      onBlur={handleBlur}
-                      value={values.username}
-                      onChange={handleChange}
-                      helperText={touched.username && errors.username}
-                      error={Boolean(errors.username && touched.username)}
-                      sx={{ mb: 3 }}
-                    />
-
+                    {/* E-mail alanı */}
                     <TextField
                       fullWidth
                       size="small"
                       type="email"
                       name="email"
-                      label="Email"
+                      label="Üniversite E-Postası"
                       variant="outlined"
                       onBlur={handleBlur}
                       value={values.email}
@@ -126,12 +122,14 @@ export default function JwtRegister() {
                       error={Boolean(errors.email && touched.email)}
                       sx={{ mb: 3 }}
                     />
+
+                    {/* Şifre alanı */}
                     <TextField
                       fullWidth
                       size="small"
                       name="password"
                       type="password"
-                      label="Password"
+                      label="Şifre"
                       variant="outlined"
                       onBlur={handleBlur}
                       value={values.password}
@@ -141,6 +139,7 @@ export default function JwtRegister() {
                       sx={{ mb: 2 }}
                     />
 
+                    {/* Onay kutusu */}
                     <Box display="flex" alignItems="center" gap={1}>
                       <Checkbox
                         size="small"
@@ -149,27 +148,30 @@ export default function JwtRegister() {
                         checked={values.remember}
                         sx={{ padding: 0 }}
                       />
-
                       <Paragraph fontSize={13}>
-                        I have read and agree to the terms of service.
+                        Kullanım şartlarını okudum ve kabul ediyorum.
                       </Paragraph>
                     </Box>
 
+                    {/* Gönder butonu */}
                     <LoadingButton
                       type="submit"
                       color="primary"
                       variant="contained"
                       loading={isSubmitting}
-                      sx={{ mb: 2, mt: 3 }}>
-                      Register
+                      sx={{ mb: 2, mt: 3 }}
+                    >
+                      Kayıt Ol
                     </LoadingButton>
 
+                    {/* Giriş linki */}
                     <Paragraph>
-                      Already have an account?
+                      Zaten bir hesabın var mı?
                       <NavLink
                         to="/session/signin"
-                        style={{ color: theme.palette.primary.main, marginLeft: 5 }}>
-                        Login
+                        style={{ color: theme.palette.primary.main, marginLeft: 5 }}
+                      >
+                        Giriş Yap
                       </NavLink>
                     </Paragraph>
                   </form>

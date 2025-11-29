@@ -4,12 +4,12 @@ import Grid from "@mui/material/Grid2";
 import { styled, useTheme } from "@mui/material/styles";
 
 import RowCards from "./shared/RowCards";
-import StatCards from "./shared/StatCards";
+import StatsOverview from "./shared/StatsOverview";
 import Campaigns from "./shared/Campaigns";
 import StatCards2 from "./shared/StatCards2";
 import DoughnutChart from "./shared/Doughnut";
 import UpgradeCard from "./shared/UpgradeCard";
-import TopSellingTable from "./shared/TopSellingTable";
+import UpcomingEventsTable from "./shared/UpcomingEventsTable";
 
 // STYLED COMPONENTS
 const ContentBox = styled("div")(({ theme }) => ({
@@ -45,11 +45,11 @@ export default function Analytics() {
       <ContentBox className="analytics">
         <Grid container spacing={3}>
           <Grid size={{ md: 8, xs: 12 }}>
-            <StatCards />
-            <TopSellingTable />
+            <StatsOverview />
+            <UpcomingEventsTable />
             <StatCards2 />
 
-            <H4>Ongoing Projects</H4>
+            <H4>En Aktif Kulüpler</H4>
             <RowCards />
           </Grid>
 

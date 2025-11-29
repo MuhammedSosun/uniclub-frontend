@@ -1,13 +1,11 @@
 import { useRoutes } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
-// ROOT THEME PROVIDER
+import { Suspense } from "react"; // ✅ EKLENDİ
+
 import { MatxTheme } from "./components";
-// ALL CONTEXTS
 import SettingsProvider from "./contexts/SettingsContext";
-import { AuthProvider } from "./contexts/FirebaseAuthContext";
-// ROUTES
+import { AuthProvider } from "./contexts/JWTAuthContext";
 import routes from "./routes";
-// FAKE SERVER
 import "../__api__";
 
 export default function App() {
@@ -18,7 +16,13 @@ export default function App() {
       <AuthProvider>
         <MatxTheme>
           <CssBaseline />
-          {content}
+          <Suspense fallback={
+  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+    <h2>Yükleniyor...</h2>
+  </div>
+}>
+  {content}
+          </Suspense>
         </MatxTheme>
       </AuthProvider>
     </SettingsProvider>

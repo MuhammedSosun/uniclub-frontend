@@ -1,6 +1,9 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { Formik } from "formik";
 import * as Yup from "yup";
+import { jwtDecode } from "jwt-decode";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import Card from "@mui/material/Card";
 import Box from "@mui/material/Box";
@@ -14,16 +17,15 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import useAuth from "app/hooks/useAuth";
 import { Paragraph } from "app/components/Typography";
 
-// STYLED COMPONENTS
 const FlexBox = styled(Box)(() => ({
-  display: "flex"
+  display: "flex",
 }));
 
 const ContentBox = styled("div")(() => ({
   height: "100%",
   padding: "32px",
   position: "relative",
-  background: "rgba(0, 0, 0, 0.01)"
+  background: "rgba(0, 0, 0, 0.01)",
 }));
 
 const StyledRoot = styled("div")(() => ({
@@ -38,56 +40,97 @@ const StyledRoot = styled("div")(() => ({
     margin: "1rem",
     display: "flex",
     borderRadius: 12,
-    alignItems: "center"
+    alignItems: "center",
   },
-
   ".img-wrapper": {
     height: "100%",
     minWidth: 320,
     display: "flex",
     padding: "2rem",
     alignItems: "center",
-    justifyContent: "center"
-  }
+    justifyContent: "center",
+  },
 }));
 
-// initial login credentials
 const initialValues = {
-  email: "jason@ui-lib.com",
-  password: "dummyPass",
-  remember: true
+  username: "",
+  password: "",
+  remember: true,
 };
 
-// form field validation schema
 const validationSchema = Yup.object().shape({
+  username: Yup.string()
+    .required("Kullanıcı adı veya öğrenci numarası zorunludur!"),
   password: Yup.string()
-    .min(6, "Password must be 6 character length")
-    .required("Password is required!"),
-  email: Yup.string().email("Invalid Email address").required("Email is required!")
+    .min(6, "Şifre en az 6 karakter olmalıdır!")
+    .required("Şifre zorunludur!"),
 });
 
 export default function JwtLogin() {
   const theme = useTheme();
   const navigate = useNavigate();
-
   const { login } = useAuth();
 
-  const handleFormSubmit = async (values) => {
+  const handleFormSubmit = async (values, { setSubmitting }) => {
     try {
-      await login(values.email, values.password);
-      navigate("/");
+      await login(values.username, values.password);
+
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        const decoded = jwtDecode(token);
+        console.log("Decoded token:", decoded);
+
+        // 🎯 Başarılı giriş bildirimi
+        toast.success(`Hoş geldin ${decoded.sub || values.username}!`, {
+          position: "top-center",
+          autoClose: 2000,
+          theme: "colored",
+        });
+
+        // 🔹 Admin login kontrolü
+        if (decoded.role === "ADMIN" || values.username === "admin") {
+          navigate("/dashboard/default");
+        } else {
+          navigate("/dashboard/default");
+        }
+      } else {
+        toast.error("Giriş başarısız! Token alınamadı.", {
+          position: "top-center",
+          theme: "colored",
+        });
+      }
     } catch (e) {
-      console.error(e);
+      console.error("Login error:", e);
+      if (e.response?.status === 401 || e.response?.status === 404) {
+        toast.error("Kullanıcı bulunamadı veya şifre hatalı!", {
+          position: "top-center",
+          autoClose: 2500,
+          theme: "colored",
+        });
+      } else {
+        toast.error("Sunucuya bağlanılamadı, tekrar deneyin.", {
+          position: "top-center",
+          autoClose: 2500,
+          theme: "colored",
+        });
+      }
+    } finally {
+      setSubmitting(false);
     }
   };
 
   return (
     <StyledRoot>
+      <ToastContainer />
       <Card className="card">
         <Grid container>
           <Grid size={{ sm: 6, xs: 12 }}>
             <div className="img-wrapper">
-              <img src="/assets/images/illustrations/dreamer.svg" width="100%" alt="" />
+              <img
+                src="/assets/images/illustrations/dreamer.svg"
+                width="100%"
+                alt="login"
+              />
             </div>
           </Grid>
 
@@ -96,7 +139,8 @@ export default function JwtLogin() {
               <Formik
                 onSubmit={handleFormSubmit}
                 initialValues={initialValues}
-                validationSchema={validationSchema}>
+                validationSchema={validationSchema}
+              >
                 {({
                   values,
                   errors,
@@ -104,21 +148,21 @@ export default function JwtLogin() {
                   isSubmitting,
                   handleChange,
                   handleBlur,
-                  handleSubmit
+                  handleSubmit,
                 }) => (
                   <form onSubmit={handleSubmit}>
                     <TextField
                       fullWidth
                       size="small"
-                      type="email"
-                      name="email"
-                      label="Email"
+                      type="text"
+                      name="username"
+                      label="Kullanıcı Adı veya Öğrenci No"
                       variant="outlined"
                       onBlur={handleBlur}
-                      value={values.email}
+                      value={values.username}
                       onChange={handleChange}
-                      helperText={touched.email && errors.email}
-                      error={Boolean(errors.email && touched.email)}
+                      helperText={touched.username && errors.username}
+                      error={Boolean(errors.username && touched.username)}
                       sx={{ mb: 3 }}
                     />
 
@@ -127,7 +171,7 @@ export default function JwtLogin() {
                       size="small"
                       name="password"
                       type="password"
-                      label="Password"
+                      label="Şifre"
                       variant="outlined"
                       onBlur={handleBlur}
                       value={values.password}
@@ -146,14 +190,14 @@ export default function JwtLogin() {
                           checked={values.remember}
                           sx={{ padding: 0 }}
                         />
-
-                        <Paragraph>Remember Me</Paragraph>
+                        <Paragraph>Beni Hatırla</Paragraph>
                       </FlexBox>
 
                       <NavLink
                         to="/session/forgot-password"
-                        style={{ color: theme.palette.primary.main }}>
-                        Forgot password?
+                        style={{ color: theme.palette.primary.main }}
+                      >
+                        Şifremi Unuttum
                       </NavLink>
                     </FlexBox>
 
@@ -162,16 +206,21 @@ export default function JwtLogin() {
                       color="primary"
                       loading={isSubmitting}
                       variant="contained"
-                      sx={{ my: 2 }}>
-                      Login
+                      sx={{ my: 2 }}
+                    >
+                      Giriş Yap
                     </LoadingButton>
 
                     <Paragraph>
-                      Don't have an account?
+                      Hesabın yok mu?
                       <NavLink
                         to="/session/signup"
-                        style={{ color: theme.palette.primary.main, marginLeft: 5 }}>
-                        Register
+                        style={{
+                          color: theme.palette.primary.main,
+                          marginLeft: 5,
+                        }}
+                      >
+                        Kayıt Ol
                       </NavLink>
                     </Paragraph>
                   </form>

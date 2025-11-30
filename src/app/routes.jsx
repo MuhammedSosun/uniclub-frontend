@@ -19,6 +19,7 @@ const Analytics = Loadable(lazy(() => import("app/views/dashboard/Analytics")));
 const UserList = Loadable(lazy(() => import("app/views/users/UserList")));
 const EventList = Loadable(lazy(() => import("app/views/events/EventList")));
 const EventCreate = Loadable(lazy(() => import("app/views/events/EventCreate")));
+const About = Loadable(lazy(() => import("app/views/about/index")));
 
 const routes = [
   { path: "/", element: <Navigate to="dashboard/default" /> },
@@ -38,6 +39,7 @@ const routes = [
       { path: "/users", element: <UserList /> },
       { path: "/events", element: <EventList /> },
       { path: "/events/create", element: <EventCreate /> },
+      {path: "/about", element: <About />},
 
       ...ClubRoutes, // 🔥 En önemli satır — bunun children içinde olması ŞART!
     ],

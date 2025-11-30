@@ -23,25 +23,35 @@ const ListLabel = styled(Paragraph)(({ theme, mode }) => ({
 const ExtAndIntCommon = {
   display: "flex",
   overflow: "hidden",
-  borderRadius: "4px",
-  height: 44,
+  borderRadius: "12px",
+  height: 48,
   whiteSpace: "pre",
-  marginBottom: "8px",
+  marginBottom: "10px",
   textDecoration: "none",
   justifyContent: "space-between",
-  transition: "all 150ms ease-in",
-  "&:hover": { background: "rgba(255, 255, 255, 0.08)" },
+  transition: "all 180ms ease",
+
+  // Hover efekti – modern
+  "&:hover": {
+    background: "rgba(255, 255, 255, 0.15)",
+    transform: "translateX(4px)",
+  },
+
+  // Compact mod
   "&.compactNavItem": {
     overflow: "hidden",
     justifyContent: "center !important"
   },
+
+  // Icon
   "& .icon": {
-    fontSize: "18px",
+    fontSize: "20px",
     paddingLeft: "16px",
     paddingRight: "16px",
-    verticalAlign: "middle"
+    verticalAlign: "middle",
   }
 };
+
 
 const ExternalLink = styled("a")(({ theme }) => ({
   ...ExtAndIntCommon,
@@ -53,25 +63,35 @@ const InternalLink = styled(Box)(({ theme }) => ({
     ...ExtAndIntCommon,
     color: theme.palette.text.primary
   },
-  "& .navItemActive": {
-    backgroundColor: "rgba(255, 255, 255, 0.16)"
-  }
+ "& .navItemActive": {
+  backgroundColor: "rgba(255, 255, 255, 0.28)",
+  backdropFilter: "blur(6px)",
+  borderRadius: "12px",
+  fontWeight: 700,
+}
+
+
 }));
 
 const StyledText = styled(Span)(({ mode }) => ({
-  fontSize: "0.875rem",
-  paddingLeft: "0.8rem",
-  display: mode === "compact" && "none"
+  fontSize: "0.93rem",
+  fontWeight: 500,
+  paddingLeft: "0.95rem",
+  letterSpacing: "0.3px",
+  display: mode === "compact" && "none",
+  transition: "0.15s",
 }));
 
+
 const BulletIcon = styled("div")(({ theme }) => ({
-  padding: "2px",
-  marginLeft: "24px",
-  marginRight: "8px",
-  overflow: "hidden",
-  borderRadius: "300px",
-  background: theme.palette.text.primary
+  width: 6,
+  height: 6,
+  marginLeft: "22px",
+  marginRight: "10px",
+  borderRadius: "50%",
+  background: theme.palette.text.primary,
 }));
+
 
 const BadgeValue = styled("div")(() => ({
   padding: "1px 8px",

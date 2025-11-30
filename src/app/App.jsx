@@ -6,7 +6,6 @@ import { MatxTheme } from "./components";
 import SettingsProvider from "./contexts/SettingsContext";
 import { AuthProvider } from "./contexts/JWTAuthContext";
 import routes from "./routes";
-import "../__api__";
 
 export default function App() {
   const content = useRoutes(routes);

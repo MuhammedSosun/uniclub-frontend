@@ -4,10 +4,11 @@ import Comment from "@mui/icons-material/Comment";
 
 import { Chatbox, ChatHead } from "app/components";
 import { Span } from "../Typography";
-import ShoppingCart from "../ShoppingCart";
-import MatxCustomizer from "../MatxCustomizer/MatxCustomizer";
 
-// STYLED COMPONENTS
+// 🔥 DOĞRU IMPORT — boşluk hatası ve yanlış klasör yolu düzeltildi
+import AccountSettingsPanel from "../AccountSettingsPanel/AccountSettingsPanel";
+
+// ---------------- STYLED COMPONENT ----------------
 const SidebarRoot = styled("div")(({ theme, width }) => ({
   position: "fixed",
   height: "100vh",
@@ -23,36 +24,46 @@ const SidebarRoot = styled("div")(({ theme, width }) => ({
   zIndex: 98,
   transition: "all 0.15s ease",
   color: theme.palette.text.primary,
+
   "@global": {
     "@media screen and (min-width: 767px)": {
       ".content-wrap, .layout2.layout-contained, .layout2.layout-full": {
-        marginRight: (props) => props.width
+        marginRight: width,
       },
       ".matx-customizer": {
-        right: (props) => props.width
-      }
+        right: width,
+      },
     },
     "@media screen and (max-width: 959px)": {
       ".toolbar-menu-wrap .menu-area": {
-        width: (props) => `calc(100% - ${props.width})`
-      }
-    }
-  }
+        width: `calc(100% - ${width})`,
+      },
+    },
+  },
 }));
 
+// ---------------- COMPONENT ----------------
 export default function SecondarySidebarContent() {
   return (
     <SidebarRoot width={"50px"} className="secondary-sidebar">
       <Span m="auto" />
-      <MatxCustomizer />
-      <ShoppingCart />
 
+      {/* 🔥 Hesap Ayarları Paneli */}
+      <AccountSettingsPanel />
+
+      {/* Sepet kısmı - istersen bunu da kaldırabiliriz */}
+
+      {/* Chat kısmı */}
       <ChatHead
         icon={
-          <IconButton size="small" sx={{ my: "12px", color: "primary.contrastText" }}>
+          <IconButton
+            size="small"
+            sx={{ my: "12px", color: "primary.contrastText" }}
+          >
             <Comment />
           </IconButton>
-        }>
+        }
+      >
         <Chatbox />
       </ChatHead>
 

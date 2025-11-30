@@ -2,64 +2,21 @@ import api from "./api";
 
 const CLUB_BASE = "/api/clubs";
 
-const clubService = {
+export default {
+    totalClubs: () => api.get(`${CLUB_BASE}/total`),
+    getTopClubsByMembers: () => api.get(`${CLUB_BASE}/stats/top-by-members`),
+    getClubById: (id) => api.get(`${CLUB_BASE}/${id}`),
+    getAllPaged: (params) => api.get(CLUB_BASE, { params }),
+    createClub: (data) => api.post(CLUB_BASE, data),
+    updateClub: (id, data) => api.put(`${CLUB_BASE}/${id}`, data),
+    deleteClub: (id) => api.delete(`${CLUB_BASE}/${id}`),
+    assignPresident: (clubId, userId) =>
+        api.patch(`${CLUB_BASE}/${clubId}/assign-president/${userId}`),
 
-    // -------------------- CREATE --------------------
-    createClub: (data) => {
-        return api.post(`${CLUB_BASE}`, data);
-    },
+    getActiveClubs: () => api.get(`${CLUB_BASE}/active`),
+    getActiveClubsPaged: (params) =>
+        api.get(`${CLUB_BASE}/active/paged`, { params }),
 
-    // -------------------- GET BY ID --------------------
-    getClubById: (id) => {
-        return api.get(`${CLUB_BASE}/${id}`);
-    },
-
-    // -------------------- GET ALL PAGED --------------------
-    getAllPaged: (params) => {
-        // params: { pageNumber, pageSize, columnName, asc }
-        return api.get(CLUB_BASE, { params });
-    },
-
-    // -------------------- UPDATE --------------------
-    updateClub: (id, data) => {
-        return api.put(`${CLUB_BASE}/${id}`, data);
-    },
-
-    // -------------------- DELETE (SOFT) --------------------
-    deleteClub: (id) => {
-        return api.delete(`${CLUB_BASE}/${id}`);
-    },
-
-    // -------------------- ASSIGN PRESIDENT --------------------
-    assignPresident: (clubId, userId) => {
-        return api.patch(`${CLUB_BASE}/${clubId}/assign-president/${userId}`);
-    },
-
-    // -------------------- ACTIVE CLUBS --------------------
-    getActiveClubs: () => {
-        return api.get(`${CLUB_BASE}/active`);
-    },
-
-    // -------------------- ACTIVE CLUBS PAGED --------------------
-    getActiveClubsPaged: (params) => {
-        return api.get(`${CLUB_BASE}/active/paged`, { params });
-    },
-
-    // -------------------- DEACTIVATE CLUB --------------------
-    deactivateClub: (id) => {
-        return api.patch(`${CLUB_BASE}/${id}/deactivate`);
-    },
-
-    // -------------------- ACTIVATE CLUB --------------------
-    activateClub: (id) => {
-        return api.patch(`${CLUB_BASE}/${id}/activate`);
-    },
-    totalClubs: () => {
-        return api.get(`${CLUB_BASE}/total`);
-    },
-    getTopClubsByMembers: () => {
-        return api.get(`${CLUB_BASE}/stats/top-by-members`)
-    },
+    deactivateClub: (id) => api.patch(`${CLUB_BASE}/${id}/deactivate`),
+    activateClub: (id) => api.patch(`${CLUB_BASE}/${id}/activate`)
 };
-
-export default clubService;

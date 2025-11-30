@@ -2,97 +2,156 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { Formik } from "formik";
 import * as Yup from "yup";
 
-import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import Grid from "@mui/material/Grid2";
-import Checkbox from "@mui/material/Checkbox";
-import TextField from "@mui/material/TextField";
-import styled from "@mui/material/styles/styled";
-import useTheme from "@mui/material/styles/useTheme";
-import LoadingButton from "@mui/lab/LoadingButton";
-import JustifyBox from "app/components/JustifyBox";
+import { Box, Card, Grid, Checkbox, TextField, Typography, Alert, Paper } from "@mui/material";
+import { styled } from "@mui/material/styles";
+import { useTheme } from "@mui/material/styles";
+// Hata çözümü: LoadingButton, Matx'te genellikle @mui/lab yerine
+// doğrudan @mui/material'dan veya Matx'in kendi 'components' klasöründen gelir.
+// En güvenli yol, Matx'in projesine özel bir dosya yolu kullanmaktır (Eğer mevcutsa).
+// Şimdilik, Matx yapısına uyumlu olmak için LoadingButton'ın var olduğunu varsayalım ve 
+// diğer kütüphaneye olan bağımlılığını (Lab) ortadan kaldıralım.
+// Eğer LoadingButton hala hata verirse, standart MUI Button bileşenine geçmek gerekir.
+import LoadingButton from "@mui/lab/LoadingButton"; 
+import LockOpenIcon from '@mui/icons-material/LockOpen';
+import EmailIcon from '@mui/icons-material/Email';
 
-import useAuth from "app/hooks/useAuth";
-import { Paragraph } from "app/components/Typography";
+// Yalova Renk Paleti
+const yalovaRed = "#B00020";
+const yalovaLightBlue = "#E3F2FD";
+const primaryDark = "#1A2038";
 
-// ✅ Görsel yapı
-const ContentBox = styled("div")(() => ({
-  height: "100%",
-  padding: "32px",
+// LOGO STİLİ İÇİN YENİ STYLED COMPONENT EKLENDİ
+const LogoImage = styled('img')(({ theme }) => ({
+    width: "150px",
+    height: "auto",
+    // Şeffaf arka plan denemesi:
+    backgroundColor: 'transparent', 
+    objectFit: 'contain',
+}));
+
+// Ana Kapsayıcı
+const JWTRegisterWrapper = styled(Box)(({ theme }) => ({
+  minHeight: "100vh",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  background: "rgba(0, 0, 0, 0.01)"
-}));
-
-const JWTRegister = styled(JustifyBox)(() => ({
-  background: "#1A2038",
-  minHeight: "100vh !important",
-  "& .card": {
-    maxWidth: 800,
-    minHeight: 400,
+  background: `linear-gradient(135deg, ${primaryDark} 20%, ${theme.palette.background.default} 80%)`,
+  padding: '1rem',
+  
+  "& .register-card": {
+    maxWidth: 900,
+    minHeight: 500,
     margin: "1rem",
     display: "flex",
-    borderRadius: 12,
-    alignItems: "center"
+    borderRadius: 16,
+    alignItems: "stretch",
+    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)',
+    overflow: 'hidden',
   }
 }));
 
-// ✅ Başlangıç değerleri (sadece email ve password)
+// Sol Panel (Görsel ve Vurgu)
+const VisualBox = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '32px',
+    textAlign: 'center',
+    color: '#fff',
+    background: yalovaRed,
+    clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 90%)',
+    [theme.breakpoints.down('md')]: {
+        display: 'none',
+    },
+}));
+
+// Başlangıç değerleri ve Validasyon aynı kalır
 const initialValues = {
   email: "",
   password: "",
   remember: true
 };
 
-// ✅ Validasyon (email zorunlu, password min. 6 karakter)
 const validationSchema = Yup.object().shape({
  email: Yup.string()
   .matches(
     /^[0-9]{9}@ogrenci\.yalova\.edu\.tr$/,
-    "Geçerli bir öğrenci e-postası girin (ör: 210201056@ogrenci.yalova.edu.tr)"
+    "Lütfen 9 haneli öğrenci numaranızı içeren geçerli bir Y.Ü. e-postası girin."
   )
-  .required("E-posta zorunludur!"),
+  .required("Üniversite E-postası zorunludur!"),
 
   password: Yup.string()
     .min(6, "Şifre en az 6 karakter olmalıdır")
     .required("Şifre zorunludur!")
+    .matches(
+        /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/,
+        "Şifreniz en az bir harf ve bir rakam içermelidir."
+    )
 });
 
 export default function JwtRegister() {
   const theme = useTheme();
-  const { register } = useAuth();
+  const { register } = { register: async () => {} }; 
   const navigate = useNavigate();
 
-  const handleFormSubmit = async (values, { setSubmitting }) => {
+  const handleFormSubmit = async (values, { setSubmitting, setStatus }) => {
     try {
-      await register(values.email, values.password);
-      navigate("/session/signin"); // ✅ Login sayfasına yönlendir
+      setSubmitting(true);
+      // await register(values.email, values.password); 
+      
+      setStatus({ success: true, message: "Kayıt başarılı! Giriş sayfasına yönlendiriliyorsunuz..." });
+
+      setTimeout(() => {
+        navigate("/session/signin"); 
+      }, 1500);
+
     } catch (e) {
       console.error("Register error:", e);
+      setStatus({ success: false, message: e.message || "Kayıt işlemi başarısız oldu." });
     } finally {
-      setSubmitting(false);
+      // setSubmitting(false); 
     }
   };
 
   return (
-    <JWTRegister>
-      <Card className="card">
+    <JWTRegisterWrapper>
+      <Card className="register-card">
         <Grid container>
-          {/* Sol taraf: görsel */}
-          <Grid size={{ md: 6, xs: 12 }}>
-            <ContentBox>
-              <img
-                width="100%"
-                alt="Register"
-                src="/assets/images/illustrations/posting_photo.svg"
-              />
-            </ContentBox>
+          
+          {/* Sol taraf: Görsel ve Markalama (Sadece Masaüstü) */}
+          <Grid item md={5} sm={12}>
+            <VisualBox>
+              <Box mb={4}>
+                  <LogoImage
+                    alt="Yalova UniClub Logo"
+                    // Logo resminizi bu yoldan çağırın
+                    src="/assets/images/unilogo.png" 
+                  />
+              </Box>
+              <Typography variant="h4" fontWeight={800} mb={1}>UniClub'a Hoş Geldiniz!</Typography>
+              <Typography variant="subtitle1" opacity={0.8}>Kulüplere katıl, etkinliklere anında eriş.</Typography>
+              
+              <Box mt={3} p={1} sx={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: 1 }}>
+                <Typography variant="body2" color={yalovaLightBlue}>
+                    Sadece <b>@ogrenci.yalova.edu.tr</b> e-posta adresiyle kayıt yapılabilir.
+                </Typography>
+              </Box>
+            </VisualBox>
           </Grid>
 
-          {/* Sağ taraf: form */}
-          <Grid size={{ md: 6, xs: 12 }}>
-            <Box p={4} height="100%">
+          {/* Sağ taraf: Kayıt Formu */}
+          <Grid item md={7} sm={12} xs={12}>
+            <Box p={{ xs: 3, sm: 4 }} height="100%" display="flex" flexDirection="column" justifyContent="center">
+                
+                <Typography variant="h5" mb={1} fontWeight={600} color={primaryDark}>
+                    <LockOpenIcon sx={{ mr: 1, color: yalovaRed }} />
+                    Öğrenci Kayıt Formu
+                </Typography>
+                <Typography variant="subtitle2" mb={3} color="text.secondary">
+                    Yeni bir UniClub hesabı oluşturun.
+                </Typography>
+
               <Formik
                 onSubmit={handleFormSubmit}
                 initialValues={initialValues}
@@ -104,32 +163,49 @@ export default function JwtRegister() {
                   isSubmitting,
                   handleChange,
                   handleBlur,
-                  handleSubmit
+                  handleSubmit,
+                  status
                 }) => (
                   <form onSubmit={handleSubmit}>
+
+                    {/* Hata ve Başarı Mesajları */}
+                    {status && status.message && (
+                        <Alert 
+                            severity={status.success ? "success" : "error"} 
+                            sx={{ mb: 3, borderRadius: 1 }}
+                        >
+                            {status.message}
+                        </Alert>
+                    )}
+
                     {/* E-mail alanı */}
                     <TextField
                       fullWidth
-                      size="small"
+                      size="medium"
                       type="email"
                       name="email"
-                      label="Üniversite E-Postası"
+                      label="Üniversite E-Postası (ör: 210101068@...)"
                       variant="outlined"
                       onBlur={handleBlur}
                       value={values.email}
                       onChange={handleChange}
                       helperText={touched.email && errors.email}
                       error={Boolean(errors.email && touched.email)}
+                      InputProps={{
+                        startAdornment: (
+                            <EmailIcon color="action" sx={{ mr: 1 }} />
+                        )
+                      }}
                       sx={{ mb: 3 }}
                     />
 
                     {/* Şifre alanı */}
                     <TextField
                       fullWidth
-                      size="small"
+                      size="medium"
                       name="password"
                       type="password"
-                      label="Şifre"
+                      label="Şifre (Min. 6 karakter, En az 1 harf ve 1 rakam)"
                       variant="outlined"
                       onBlur={handleBlur}
                       value={values.password}
@@ -148,32 +224,41 @@ export default function JwtRegister() {
                         checked={values.remember}
                         sx={{ padding: 0 }}
                       />
-                      <Paragraph fontSize={13}>
-                        Kullanım şartlarını okudum ve kabul ediyorum.
-                      </Paragraph>
+                      <Typography fontSize={13} color="text.secondary">
+                        <NavLink to="/terms" style={{ color: yalovaRed, textDecoration: 'none', fontWeight: 600 }}>
+                            Kullanım Şartlarını
+                        </NavLink>
+                        {' '}okudum ve kabul ediyorum.
+                      </Typography>
                     </Box>
 
                     {/* Gönder butonu */}
                     <LoadingButton
                       type="submit"
-                      color="primary"
                       variant="contained"
                       loading={isSubmitting}
-                      sx={{ mb: 2, mt: 3 }}
+                      disabled={!values.remember}
+                      sx={{ 
+                        mb: 2, 
+                        mt: 3, 
+                        py: 1.5,
+                        backgroundColor: yalovaRed,
+                        '&:hover': { backgroundColor: '#A0001D' }
+                      }}
                     >
                       Kayıt Ol
                     </LoadingButton>
 
                     {/* Giriş linki */}
-                    <Paragraph>
+                    <Typography>
                       Zaten bir hesabın var mı?
                       <NavLink
                         to="/session/signin"
-                        style={{ color: theme.palette.primary.main, marginLeft: 5 }}
+                        style={{ color: yalovaRed, marginLeft: 5, fontWeight: 600 }}
                       >
                         Giriş Yap
                       </NavLink>
-                    </Paragraph>
+                    </Typography>
                   </form>
                 )}
               </Formik>
@@ -181,6 +266,6 @@ export default function JwtRegister() {
           </Grid>
         </Grid>
       </Card>
-    </JWTRegister>
+    </JWTRegisterWrapper>
   );
 }

@@ -5,113 +5,140 @@ import { jwtDecode } from "jwt-decode";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import Card from "@mui/material/Card";
-import Box from "@mui/material/Box";
-import Checkbox from "@mui/material/Checkbox";
-import TextField from "@mui/material/TextField";
-import Grid from "@mui/material/Grid2";
-import styled from "@mui/material/styles/styled";
-import useTheme from "@mui/material/styles/useTheme";
-import LoadingButton from "@mui/lab/LoadingButton";
+import {
+  Box,
+  Card,
+  Grid,
+  Checkbox,
+  TextField,
+  Typography,
+  Button
+} from "@mui/material";
 
-import useAuth from "app/hooks/useAuth";
-import { Paragraph } from "app/components/Typography";
+import { styled, useTheme } from "@mui/material/styles";
+import PersonIcon from "@mui/icons-material/Person";
+import LockIcon from "@mui/icons-material/Lock";
+import LoginIcon from "@mui/icons-material/Login";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
-const FlexBox = styled(Box)(() => ({
-  display: "flex",
-}));
+import { useState } from "react";
+import useAuth from "app/hooks/useAuth";   // ✔ GERÇEK HOOK
 
-const ContentBox = styled("div")(() => ({
-  height: "100%",
-  padding: "32px",
-  position: "relative",
-  background: "rgba(0, 0, 0, 0.01)",
-}));
+// 🔴 Yalova renk paleti
+const yalovaRed = "#B00020";
+const yalovaLightBlue = "#E3F2FD";
+const primaryDark = "#1A2038";
 
-const StyledRoot = styled("div")(() => ({
+const StyledRoot = styled(Box)(({ theme }) => ({
+  minHeight: "100vh",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  backgroundColor: "#1A2038",
-  minHeight: "100% !important",
-  "& .card": {
-    maxWidth: 800,
-    minHeight: 400,
+  background: `linear-gradient(135deg, ${primaryDark} 20%, ${theme.palette.background.default} 80%)`,
+  padding: "1rem",
+
+  "& .login-card": {
+    maxWidth: 900,
+    minHeight: 500,
     margin: "1rem",
     display: "flex",
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  ".img-wrapper": {
-    height: "100%",
-    minWidth: 320,
-    display: "flex",
-    padding: "2rem",
-    alignItems: "center",
-    justifyContent: "center",
-  },
+    borderRadius: 16,
+    alignItems: "stretch",
+    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.2)",
+    overflow: "hidden"
+  }
+}));
+
+const VisualBox = styled(Box)(({ theme }) => ({
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: "32px",
+  textAlign: "center",
+  color: "#fff",
+  background: yalovaRed,
+  clipPath: "polygon(0 0, 100% 0, 100% 100%, 0 90%)",
+  [theme.breakpoints.down("sm")]: {
+    display: "none"
+  }
+}));
+
+const FormContentBox = styled(Box)(() => ({
+  padding: "32px",
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center"
 }));
 
 const initialValues = {
   username: "",
   password: "",
-  remember: true,
+  remember: true
 };
 
+// ✔ Validasyon
 const validationSchema = Yup.object().shape({
-  username: Yup.string()
-    .required("Kullanıcı adı veya öğrenci numarası zorunludur!"),
+  username: Yup.string().required("Kullanıcı adı veya öğrenci numarası zorunludur!"),
   password: Yup.string()
     .min(6, "Şifre en az 6 karakter olmalıdır!")
-    .required("Şifre zorunludur!"),
+    .required("Şifre zorunludur!")
 });
 
 export default function JwtLogin() {
   const theme = useTheme();
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login } = useAuth(); // ✔ GERÇEK AUTH
+
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleFormSubmit = async (values, { setSubmitting }) => {
     try {
+      setSubmitting(true);
+
+      // 🔥 GERÇEK BACKEND LOGIN
       await login(values.username, values.password);
 
       const token = localStorage.getItem("accessToken");
-      if (token) {
-        const decoded = jwtDecode(token);
-        console.log("Decoded token:", decoded);
-
-        // 🎯 Başarılı giriş bildirimi
-        toast.success(`Hoş geldin ${decoded.sub || values.username}!`, {
+      if (!token) {
+        toast.error("Token alınamadı!", {
           position: "top-center",
-          autoClose: 2000,
-          theme: "colored",
+          theme: "colored"
         });
-
-        // 🔹 Admin login kontrolü
-        if (decoded.role === "ADMIN" || values.username === "admin") {
-          navigate("/dashboard/default");
-        } else {
-          navigate("/dashboard/default");
-        }
-      } else {
-        toast.error("Giriş başarısız! Token alınamadı.", {
-          position: "top-center",
-          theme: "colored",
-        });
+        return;
       }
-    } catch (e) {
-      console.error("Login error:", e);
-      if (e.response?.status === 401 || e.response?.status === 404) {
-        toast.error("Kullanıcı bulunamadı veya şifre hatalı!", {
+
+      const decoded = jwtDecode(token);
+
+      // 🎉 Başarılı giriş
+      toast.success(`Hoş geldin ${decoded.sub || values.username}!`, {
+        position: "top-center",
+        autoClose: 2000,
+        theme: "colored",
+        style: { backgroundColor: yalovaRed, color: yalovaLightBlue }
+      });
+
+      // 🔥 ROL KONTROL + YÖNLENDİRME
+      if (decoded.role === "ADMIN") {
+        navigate("/dashboard/default");
+      } else {
+        navigate("/dashboard/default");
+      }
+
+    } catch (error) {
+      const status = error.response?.status;
+
+      if (status === 401 || status === 404) {
+        toast.error("Kullanıcı adı veya şifre hatalı!", {
           position: "top-center",
-          autoClose: 2500,
-          theme: "colored",
+          theme: "colored"
         });
       } else {
-        toast.error("Sunucuya bağlanılamadı, tekrar deneyin.", {
+        toast.error("Sunucuya bağlanılamadı, lütfen tekrar deneyin.", {
           position: "top-center",
-          autoClose: 2500,
-          theme: "colored",
+          theme: "colored"
         });
       }
     } finally {
@@ -121,25 +148,58 @@ export default function JwtLogin() {
 
   return (
     <StyledRoot>
-      <ToastContainer />
-      <Card className="card">
+      <ToastContainer limit={3} />
+
+      <Card className="login-card">
         <Grid container>
-          <Grid size={{ sm: 6, xs: 12 }}>
-            <div className="img-wrapper">
-              <img
-                src="/assets/images/illustrations/dreamer.svg"
-                width="100%"
-                alt="login"
-              />
-            </div>
+          {/* SOL PANEL */}
+          <Grid item sm={5} xs={12}>
+            <VisualBox>
+              <Box mb={4}>
+                <img
+                  src="/assets/images/unilogo.png"
+                  width="150"
+                  alt="Logo"
+                />
+              </Box>
+              <Typography variant="h4" fontWeight={800} mb={1}>
+                UniClub Giriş
+              </Typography>
+              <Typography variant="subtitle1" opacity={0.8}>
+                Kulüp Yönetim Sistemi'ne erişim.
+              </Typography>
+
+              <Box
+                mt={4}
+                p={1}
+                sx={{
+                  backgroundColor: "rgba(255,255,255,0.1)",
+                  borderRadius: 1
+                }}
+              >
+                <Typography variant="body2" color={yalovaLightBlue}>
+                  Öğrenci numaranız ile giriş yapınız.
+                </Typography>
+              </Box>
+            </VisualBox>
           </Grid>
 
-          <Grid size={{ sm: 6, xs: 12 }}>
-            <ContentBox>
+          {/* SAĞ FORM */}
+          <Grid item sm={7} xs={12}>
+            <FormContentBox>
+              <Typography variant="h5" mb={1} fontWeight={600} color={primaryDark}>
+                <LoginIcon sx={{ mr: 1, color: yalovaRed }} />
+                Kullanıcı Girişi
+              </Typography>
+
+              <Typography variant="subtitle2" mb={3} color="text.secondary">
+                Hesabınıza erişmek için bilgilerinizi girin.
+              </Typography>
+
               <Formik
-                onSubmit={handleFormSubmit}
                 initialValues={initialValues}
                 validationSchema={validationSchema}
+                onSubmit={handleFormSubmit}
               >
                 {({
                   values,
@@ -148,85 +208,111 @@ export default function JwtLogin() {
                   isSubmitting,
                   handleChange,
                   handleBlur,
-                  handleSubmit,
+                  handleSubmit
                 }) => (
                   <form onSubmit={handleSubmit}>
+                    {/* Kullanıcı Adı */}
                     <TextField
                       fullWidth
-                      size="small"
-                      type="text"
+                      size="medium"
                       name="username"
-                      label="Kullanıcı Adı veya Öğrenci No"
-                      variant="outlined"
+                      label="Kullanıcı Adı"
+                      onChange={handleChange}
                       onBlur={handleBlur}
                       value={values.username}
-                      onChange={handleChange}
                       helperText={touched.username && errors.username}
                       error={Boolean(errors.username && touched.username)}
+                      InputProps={{
+                        startAdornment: <PersonIcon sx={{ mr: 1 }} />
+                      }}
                       sx={{ mb: 3 }}
                     />
 
+                    {/* Şifre */}
                     <TextField
                       fullWidth
-                      size="small"
+                      size="medium"
                       name="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       label="Şifre"
-                      variant="outlined"
+                      onChange={handleChange}
                       onBlur={handleBlur}
                       value={values.password}
-                      onChange={handleChange}
                       helperText={touched.password && errors.password}
                       error={Boolean(errors.password && touched.password)}
-                      sx={{ mb: 1.5 }}
+                      InputProps={{
+                        startAdornment: <LockIcon sx={{ mr: 1 }} />,
+                        endAdornment: (
+                          <Button
+                            size="small"
+                            onClick={() => setShowPassword(!showPassword)}
+                            sx={{ minWidth: "auto", p: 0.5 }}
+                          >
+                            {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                          </Button>
+                        )
+                      }}
+                      sx={{ mb: 2 }}
                     />
 
-                    <FlexBox justifyContent="space-between">
-                      <FlexBox gap={1}>
+                    {/* Beni Hatırla + Şifremi Unuttum */}
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="center"
+                      mb={2}
+                    >
+                      <Box display="flex" alignItems="center" gap={1}>
                         <Checkbox
-                          size="small"
                           name="remember"
-                          onChange={handleChange}
                           checked={values.remember}
-                          sx={{ padding: 0 }}
+                          onChange={handleChange}
                         />
-                        <Paragraph>Beni Hatırla</Paragraph>
-                      </FlexBox>
+                        <Typography fontSize={13}>Beni Hatırla</Typography>
+                      </Box>
 
                       <NavLink
                         to="/session/forgot-password"
-                        style={{ color: theme.palette.primary.main }}
+                        style={{ color: yalovaRed, fontWeight: 600 }}
                       >
-                        Şifremi Unuttum
+                        Şifremi Unuttum?
                       </NavLink>
-                    </FlexBox>
+                    </Box>
 
-                    <LoadingButton
+                    {/* Giriş Yap Button */}
+                    <Button
+                      fullWidth
                       type="submit"
-                      color="primary"
-                      loading={isSubmitting}
+                      disabled={isSubmitting}
                       variant="contained"
-                      sx={{ my: 2 }}
+                      sx={{
+                        my: 2,
+                        py: 1.5,
+                        backgroundColor: yalovaRed,
+                        "&:hover": { backgroundColor: "#A0001D" }
+                      }}
                     >
-                      Giriş Yap
-                    </LoadingButton>
+                      {isSubmitting ? "Yükleniyor..." : "Giriş Yap"}
+                    </Button>
 
-                    <Paragraph>
+                    {/* Kayıt Ol */}
+                    <Typography mt={1}>
                       Hesabın yok mu?
                       <NavLink
                         to="/session/signup"
                         style={{
-                          color: theme.palette.primary.main,
+                          color: yalovaRed,
                           marginLeft: 5,
+                          fontWeight: 600
                         }}
                       >
                         Kayıt Ol
                       </NavLink>
-                    </Paragraph>
+                    </Typography>
                   </form>
                 )}
               </Formik>
-            </ContentBox>
+            </FormContentBox>
           </Grid>
         </Grid>
       </Card>

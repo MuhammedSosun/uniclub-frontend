@@ -1,22 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { AppBar, Toolbar, Typography, Button, Box, useTheme, Container } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import WavingHandIcon from '@mui/icons-material/WavingHand';
 import PublicIcon from '@mui/icons-material/Public';
 import CodeIcon from '@mui/icons-material/Code';
 
-// --- MOCK DEPENDENCIES (Gerçek uygulamada bu kısımlar app/utils ve app/hooks'tan gelmelidir) ---
-const topBarHeight = 64;
+// --- MOCK DEPENDENCIES ---
+const topBarHeight = 64; 
+const yalovaRed = "#B00020"; 
+const yalovaLightBlue = "#E3F2FD"; 
+const footerBg = "#1f1f1f"; // Koyu Arka Plan
 
-// Basit bir settings mock'u
 const mockTheme = createTheme({
-  palette: {
-    primary: { main: '#B00020' },
-    secondary: { main: '#E3F2FD' },
-  },
-  typography: {
-    fontFamily: 'Roboto, sans-serif',
-  }
+  palette: { primary: { main: yalovaRed }, secondary: { main: yalovaLightBlue } },
+  typography: { fontFamily: 'Inter, sans-serif' }
 });
 
 const useSettings = () => ({
@@ -27,57 +23,16 @@ const useSettings = () => ({
 });
 // ------------------------------------------------------------------------------------
 
-// Yalova Üniversitesi Renk Paleti ve Modernleştirilmiş Renkler
-const yalovaRed = "#B00020"; // Ana Kurumsal Kırmızı
-const yalovaLightBlue = "#E3F2FD"; // Çok Açık Mavi/Beyaz
-const footerBg = "#151515"; // Koyu Arka Plan
-const footerText = yalovaLightBlue;
-
-// Dinamik Dalgalı Ayırıcı (SVG)
-const WaveDivider = ({ color }) => (
-  <Box
-    sx={{
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      width: '100%',
-      lineHeight: 0,
-      transform: 'translateY(-100%)', // Footer'ın üstüne oturt
-      zIndex: 90,
-      pointerEvents: 'none',
-      filter: 'drop-shadow(0 -2px 1px rgba(0,0,0,0.1))',
-    }}
-  >
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 1440 100" 
-      preserveAspectRatio="none"
-      style={{ display: 'block', width: '100%', height: '10vh', minHeight: '50px', maxHeight: '100px' }}
-    >
-      <path 
-        fill={color} 
-        fillOpacity="1" 
-        d="M0,32L60,48C120,64,240,96,360,96C480,96,600,64,720,53.3C840,43,960,53,1080,58.7C1200,64,1320,64,1380,64L1440,64L1440,32L1380,32C1320,32,1200,32,1080,32C960,32,840,32,720,32C600,32,480,32,360,32C240,32,120,32,60,32L0,32Z"
-      ></path>
-    </svg>
-  </Box>
-);
-
-// Ana Footer Bileşeni
 export default function Footer() {
-  const theme = useTheme();
   const { settings } = useSettings();
 
-  // Settings'ten gelen tema yerine koyu bir tema oluşturuyoruz.
   const customFooterTheme = createTheme({
     palette: {
       primary: { main: yalovaRed },
       secondary: { main: yalovaLightBlue },
       background: { default: footerBg },
     },
-    typography: {
-      fontFamily: 'Inter, sans-serif',
-    },
+    typography: { fontFamily: 'Inter, sans-serif' },
     components: {
       MuiButton: {
         styleOverrides: {
@@ -96,27 +51,27 @@ export default function Footer() {
   return (
     <ThemeProvider theme={customFooterTheme}>
       <AppBar
-        position="relative" // 'static' yerine 'relative' kullanarak dalgayı pozisyonlayacağız
+        position="static" // Bu, Footer'ın normal akışta kalmasını sağlar.
         elevation={0}
         sx={{
           zIndex: 96,
           background: footerBg,
-          minHeight: topBarHeight * 2,
-          position: 'relative', // Dalga için
-          borderTop: `5px solid ${yalovaRed}`, // Üst kısımda kırmızı bir çizgi
+          minHeight: 120, // Sabit bir minimum yükseklik verdim
+          borderTop: `4px solid ${yalovaRed}`, 
         }}
       >
-        {/* Dalgalı Ayırıcı Bileşeni */}
-        <WaveDivider color={footerBg} />
+        {/* Dalgalı Ayırıcı KALDIRILDI. Artık sadece düz bir blok. */}
 
         <Container 
           maxWidth="xl" 
           sx={{ 
             height: '100%', 
-            py: { xs: 4, md: 6 } 
+            py: { xs: 3, md: 4 }, // Dikey dolguyu azalttım, çakışmayı önlemek için.
+            display: 'flex',
+            alignItems: 'center',
           }}
         >
-          <Toolbar disableGutters sx={{ minHeight: 'unset', flexWrap: 'wrap', p: 0 }}>
+          <Toolbar disableGutters sx={{ minHeight: 'unset', flexWrap: 'wrap', p: 0, width: '100%' }}>
             <Box
               sx={{
                 width: '100%',
@@ -124,7 +79,7 @@ export default function Footer() {
                 alignItems: 'center',
                 flexDirection: { xs: 'column', md: 'row' },
                 justifyContent: 'space-between',
-                gap: { xs: 3, md: 4 },
+                gap: { xs: 2, md: 3 },
               }}
             >
               {/* KOLON 1: YALOVA ÜNİVERSİTESİ BUTONU */}
@@ -134,18 +89,15 @@ export default function Footer() {
                   startIcon={<PublicIcon />}
                   sx={{
                     background: yalovaRed,
-                    color: footerText,
+                    color: yalovaLightBlue,
                     fontWeight: 700,
                     textTransform: "uppercase",
-                    borderRadius: 8, // Daha yumuşak yuvarlaklık
-                    px: 4,
-                    py: 1.5,
-                    fontSize: { xs: '0.85rem', sm: '1rem' },
+                    borderRadius: 8, 
+                    px: 3,
+                    py: 1.2,
+                    fontSize: '0.9rem',
                     boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
-                    "&:hover": {
-                      background: '#A0001D', // Hafifçe koyu ton
-                      boxShadow: '0 6px 20px rgba(176, 0, 32, 0.5)',
-                    }
+                    "&:hover": { background: '#A0001D' }
                   }}
                   onClick={() => window.open("https://www.yalova.edu.tr/", "_blank")}
                 >
@@ -153,54 +105,30 @@ export default function Footer() {
                 </Button>
               </Box>
 
-              {/* KOLON 2: MERKEZ METİN (TELİF HAKKI VE BAŞLIK) */}
-              <Box
-                sx={{
-                  textAlign: { xs: 'center', md: 'center' },
-                  order: { xs: 1, md: 2 },
-                  flexGrow: 1,
-                }}
-              >
+              {/* KOLON 2: MERKEZ METİN */}
+              <Box sx={{ textAlign: 'center', order: { xs: 1, md: 2 }, flexGrow: 1 }}>
                 <Typography
-                  variant="h5"
-                  component="p"
-                  sx={{
-                    color: footerText,
-                    fontWeight: 800,
-                    letterSpacing: '1px',
-                    mb: 1,
-                    textShadow: '0 0 10px rgba(255,255,255,0.1)',
-                  }}
+                  variant="h6"
+                  sx={{ color: yalovaLightBlue, fontWeight: 800, letterSpacing: '1px', mb: 0.5 }}
                 >
                   UniClub
                 </Typography>
                 <Typography
                   variant="body2"
-                  sx={{
-                    color: footerText,
-                    opacity: 0.8,
-                    fontSize: '0.9rem',
-                    fontWeight: 400,
-                  }}
+                  sx={{ color: yalovaLightBlue, opacity: 0.8, fontSize: '0.85rem' }}
                 >
                   Yalova Üniversitesi Kulüp Yönetim Sistemi © 2025
                 </Typography>
               </Box>
 
               {/* KOLON 3: GELİŞTİRENLER */}
-              <Box 
-                sx={{ 
-                  flexShrink: 0, 
-                  order: { xs: 3, md: 3 }, 
-                  textAlign: { xs: 'center', md: 'right' } 
-                }}
-              >
+              <Box sx={{ flexShrink: 0, order: { xs: 3, md: 3 }, textAlign: 'right' }}>
                 <Typography
                   variant="caption"
                   component="p"
                   sx={{
                     color: yalovaLightBlue,
-                    fontSize: '0.9rem',
+                    fontSize: '0.85rem',
                     opacity: 0.95,
                     display: 'flex',
                     alignItems: 'center',
@@ -211,17 +139,7 @@ export default function Footer() {
                 >
                   <CodeIcon sx={{ color: yalovaRed, fontSize: '1.2rem' }} />
                   Geliştirenler:
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: yalovaLightBlue,
-                    fontSize: '1rem',
-                    fontWeight: 700,
-                    mt: 0.5,
-                  }}
-                >
-                  Muhammed Sosun & Muhammed Eren Şancı
+                  <Box component="b" sx={{ ml: 0.5 }}>Muhammed Sosun & Muhammed Eren Şancı</Box>
                 </Typography>
               </Box>
             </Box>

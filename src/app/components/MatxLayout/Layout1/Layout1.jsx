@@ -12,7 +12,6 @@ import Layout1Sidenav from "./Layout1Sidenav";
 import Footer from "app/components/Footer";
 import { MatxSuspense } from "app/components";
 import useSettings from "app/hooks/useSettings";
-import { SecondarySidebar } from "app/components/SecondarySidebar";
 import SidenavTheme from "app/components/MatxTheme/SidenavTheme/SidenavTheme";
 import { sidenavCompactWidth, sideNavWidth } from "app/utils/constant";
 
@@ -41,7 +40,7 @@ const StyledScrollBar = styled(Scrollbar)(() => ({
 
 const LayoutContainer = styled("div", {
   shouldForwardProp: (prop) => prop !== "open" && prop !== "width"
-})(({ width, open }) => ({
+})(({ width }) => ({
   height: "100vh",
   display: "flex",
   flexGrow: "1",
@@ -50,14 +49,17 @@ const LayoutContainer = styled("div", {
   marginLeft: width,
   position: "relative",
   overflow: "hidden",
-  transition: "all 0.3s ease",
-  marginRight: open ? 50 : 0
+  transition: "all 0.3s ease"
 }));
 
 const Layout1 = () => {
   const { settings, updateSettings } = useSettings();
-  const { layout1Settings, secondarySidebar } = settings;
+
+  // ✔ DOĞRU ŞEKİLDE EKLENEN TANIM
+  const layout1Settings = settings.layout1Settings;
+
   const topbarTheme = settings.themes[layout1Settings.topbar.theme];
+
   const {
     leftSidebar: { mode: sidenavMode, show: showSidenav }
   } = layout1Settings;
@@ -66,48 +68,47 @@ const Layout1 = () => {
     switch (sidenavMode) {
       case "full":
         return sideNavWidth;
-
       case "compact":
         return sidenavCompactWidth;
-
       default:
         return "0px";
     }
   };
 
   const sidenavWidth = getSidenavWidth();
+
   const theme = useTheme();
   const isMdScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const ref = useRef({ isMdScreen, settings });
-  const layoutClasses = `theme-${theme.palette.type}`;
 
   useEffect(() => {
     let { settings } = ref.current;
     let sidebarMode = settings.layout1Settings.leftSidebar.mode;
+
     if (settings.layout1Settings.leftSidebar.show) {
       let mode = isMdScreen ? "close" : sidebarMode;
       updateSettings({ layout1Settings: { leftSidebar: { mode } } });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMdScreen]);
 
   return (
-    <Layout1Root className={layoutClasses}>
+    <Layout1Root>
       {showSidenav && sidenavMode !== "close" && (
         <SidenavTheme>
           <Layout1Sidenav />
         </SidenavTheme>
       )}
 
-      <LayoutContainer width={sidenavWidth} open={secondarySidebar.open}>
+      {/* SecondarySidebar tamamen kaldırıldı */}
+      <LayoutContainer width={sidenavWidth}>
         {layout1Settings.topbar.show && layout1Settings.topbar.fixed && (
           <ThemeProvider theme={topbarTheme}>
-            <Layout1Topbar fixed={true} className="elevation-z8" />
+            <Layout1Topbar fixed className="elevation-z8" />
           </ThemeProvider>
         )}
 
-        {settings.perfectScrollbar && (
+        {settings.perfectScrollbar ? (
           <StyledScrollBar>
             {layout1Settings.topbar.show && !layout1Settings.topbar.fixed && (
               <ThemeProvider theme={topbarTheme}>
@@ -123,9 +124,7 @@ const Layout1 = () => {
 
             {settings.footer.show && !settings.footer.fixed && <Footer />}
           </StyledScrollBar>
-        )}
-
-        {!settings.perfectScrollbar && (
+        ) : (
           <ContentBox>
             {layout1Settings.topbar.show && !layout1Settings.topbar.fixed && (
               <ThemeProvider theme={topbarTheme}>
@@ -145,8 +144,6 @@ const Layout1 = () => {
 
         {settings.footer.show && settings.footer.fixed && <Footer />}
       </LayoutContainer>
-
-      {settings.secondarySidebar.show && <SecondarySidebar />}
     </Layout1Root>
   );
 };

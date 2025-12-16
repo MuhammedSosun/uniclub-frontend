@@ -11,7 +11,6 @@ const navigations = [
 },
 
   {name:"Etkinliker", path: "/events", icon: "event"},
-  {name: "Etkinlik Oluştur", path: "/events/create", icon: "add_circle"},
   { label: "PAGES", type: "label" },
   {
     name: "Kullanıcı İşlemleri",

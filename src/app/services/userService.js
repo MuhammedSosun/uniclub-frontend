@@ -1,22 +1,43 @@
-import axios from "axios";
+import api from "./api";
 
-export const getAllUsers = async (filter = "") => {
-  try {
-    const token = localStorage.getItem("accessToken");
+// ------------------ AUTH ------------------
 
-    const url = filter
-      ? `auth/filter/users?filter=${filter}`
-      : "auth/all/users";
+export const registerUser = async (data) => {
+    return api.post("/auth/register", data);
+};
 
-    const res = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+export const loginUser = async (data) => {
+    const response = await api.post("/auth/authenticate", data);
+
+    // ✔ token kaydediliyor
+    if (response?.data?.accessToken) {
+        localStorage.setItem("accessToken", response.data.accessToken);
+    }
+
+    return response;
+};
+
+export const refreshToken = async (refreshToken) => {
+    return api.post("/auth/refreshToken", { refreshToken });
+};
+
+// ------------------ USERS ------------------
+
+export const getAllUsers = async () => {
+    return api.get("/auth/all/users");
+};
+
+export const searchUsers = async (filter = "") => {
+    return api.get(`/auth/filter/users`, {
+        params: { filter }
     });
+};
 
-    return res.data;
-  } catch (err) {
-    console.error("getAllUsers error:", err);
-    throw err;
-  }
+export const updateUserRole = async (userId, newRole) => {
+    return api.put(`/auth/users/${userId}/role?newRole=${newRole}`);
+};
+
+export const logoutUser = async () => {
+    localStorage.removeItem("accessToken");
+    return api.post("/auth/logout");
 };

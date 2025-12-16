@@ -1,9 +1,6 @@
-export { default as Chatbox } from "./Chatbox";
-export { default as ChatHead } from "./ChatHead";
 export { default as MatxLogo } from "./MatxLogo";
 export { default as MatxMenu } from "./MatxMenu";
 export { default as Breadcrumb } from "./Breadcrumb";
-export { default as ChatAvatar } from "./ChatAvatar";
 export { default as SimpleCard } from "./SimpleCard";
 export { default as MatxLoading } from "./MatxLoading";
 export { default as MatxSuspense } from "./MatxSuspense";

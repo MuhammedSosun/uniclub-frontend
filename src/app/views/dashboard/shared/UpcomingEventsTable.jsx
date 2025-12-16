@@ -140,11 +140,7 @@ export default function UpcomingEventsTable() {
                     </IconButton>
                   </Tooltip>
 
-                  <Tooltip title="Düzenle">
-                    <IconButton color="secondary" size="small">
-                      <EditIcon />
-                    </IconButton>
-                  </Tooltip>
+                  
                 </TableCell>
               </TableRow>
             ))}

@@ -21,6 +21,7 @@ const EventList = Loadable(lazy(() => import("app/views/events/EventList")));
 const EventCreate = Loadable(lazy(() => import("app/views/events/EventCreate")));
 const About = Loadable(lazy(() => import("app/views/about/index")));
 
+
 const routes = [
   { path: "/", element: <Navigate to="dashboard/default" /> },
 

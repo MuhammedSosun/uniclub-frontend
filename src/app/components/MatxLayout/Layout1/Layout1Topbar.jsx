@@ -131,10 +131,12 @@ const Layout1Topbar = () => {
             menuButton={
               <UserMenu>
                 <Span>
-                  Hi <strong>{user.name}</strong>
+                  Hi <strong>{user?.username}</strong>
                 </Span>
 
-                <Avatar src={user.avatar} sx={{ cursor: "pointer" }} />
+                <Avatar sx={{ cursor: "pointer" }}>
+        {user?.username?.charAt(0).toUpperCase()}
+      </Avatar>
               </UserMenu>
             }>
             <StyledItem>
@@ -145,11 +147,12 @@ const Layout1Topbar = () => {
             </StyledItem>
 
             <StyledItem>
-              <Link to="/page-layouts/user-profile">
-                <Person />
-                <Span sx={{ marginInlineStart: 1 }}>Profile</Span>
-              </Link>
-            </StyledItem>
+  <Link to="/profile">
+    <Person />
+    <Span sx={{ marginInlineStart: 1 }}>Profile</Span>
+  </Link>
+</StyledItem>
+
 
             <StyledItem>
               <Settings />

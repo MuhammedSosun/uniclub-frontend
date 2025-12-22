@@ -68,7 +68,7 @@ export default function ClubDetail() {
                 </Typography>
                 <Chip 
                   label={club.status}
-                  color={club.status === "Active" ? "success" : "default"}
+                  color={club.status === "ACTIVE" ? "success" : "default"}
                   size="small"
                   sx={{ mt: 0.5 }}
                 />

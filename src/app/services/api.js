@@ -7,7 +7,6 @@ const api = axios.create({
     }
 });
 
-// JWT Token otomatik ekleme
 api.interceptors.request.use((config) => {
     const token = localStorage.getItem("accessToken"); // DOĞRU KEY
     if (token) {

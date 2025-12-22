@@ -139,8 +139,6 @@ export default function UpcomingEventsTable() {
                       <VisibilityIcon />
                     </IconButton>
                   </Tooltip>
-
-                  
                 </TableCell>
               </TableRow>
             ))}

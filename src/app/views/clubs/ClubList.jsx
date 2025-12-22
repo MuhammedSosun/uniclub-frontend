@@ -64,7 +64,7 @@ export default function ClubList() {
             renderCell: (params) => (
                 <span
                     style={{
-                        color: params.value === "Active" ? "green" : "red",
+                        color: params.value === "ACTIVE" ? "green" : "red",
                         fontWeight: "bold",
                     }}
                 >

@@ -4,6 +4,10 @@ import { DataGrid } from "@mui/x-data-grid";
 import clubService from "app/services/clubService";
 import { Button, Stack } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import membershipService from "app/services/membershipsService";
+import { Tooltip } from "@mui/material";
+
+
 
 export default function ClubList() {
     const [rows, setRows] = useState([]);
@@ -47,6 +51,23 @@ export default function ClubList() {
             setLoading(false);
         }
     };
+    const handleJoinClub = async (clubId, status) => {
+        if(status !== "ACTIVE"){
+        alert("Bu kulüp aktif değil, başvuru gönderemezsin.");
+        return;
+        }
+        try {
+        await membershipService.requestJoin(clubId);
+        alert("Başvuru gönderildi ✅ (Admin onayı bekleniyor)");
+    } catch (error) {
+        console.error("Join request hata:", error);
+        const msg =
+            error?.response?.data?.message ||
+            error?.response?.data?.payload?.message || // bazı yapılarda buradan gelir
+            "Başvuru gönderilemedi";
+        alert(msg);
+    }
+    };
 
     useEffect(() => {
         loadClubs();
@@ -73,40 +94,53 @@ export default function ClubList() {
             ),
         },
         {
-            field: "actions",
-            headerName: "İşlemler",
-            width: 250,
-            renderCell: (params) => (
-                <Stack direction="row" spacing={1}>
-                    <Button
-                        variant="contained"
-                        color="info"
-                        size="small"
-                        onClick={() => navigate(`/clubs/detail/${params.row.id}`)}
-                    >
-                        Detay
-                    </Button>
+    field: "actions",
+    headerName: "İşlemler",
+    width: 340,
+    sortable: false,
+    filterable: false,
+    renderCell: (params) => (
+        <Stack direction="row" spacing={1}>
+            <Button
+                variant="contained"
+                color="info"
+                size="small"
+                onClick={() => navigate(`/clubs/detail/${params.row.id}`)}
+            >
+                Detay
+            </Button>
 
-                    <Button
-                        variant="contained"
-                        color="warning"
-                        size="small"
-                        onClick={() => navigate(`/clubs/update/${params.row.id}`)}
-                    >
-                        Düzenle
-                    </Button>
+            <Button
+                variant="contained"
+                color="warning"
+                size="small"
+                onClick={() => navigate(`/clubs/update/${params.row.id}`)}
+            >
+                Düzenle
+            </Button>
 
-                    <Button
-                        variant="contained"
-                        color="error"
-                        size="small"
-                        onClick={() => alert("Silme fonksiyonu eklenecek")}
-                    >
-                        Sil
-                    </Button>
-                </Stack>
-            ),
-        },
+            <Button
+                variant="contained"
+                color="error"
+                size="small"
+                onClick={() => alert("Silme fonksiyonu eklenecek")}
+            >
+                Sil
+            </Button>
+
+            {/* ✅ Yeni: Kulübe Katıl */}
+            <Button
+                variant="contained"
+                color="success"
+                size="small"
+                disabled={params.row.status !== "ACTIVE"}
+                onClick={() => handleJoinClub(params.row.id, params.row.status)}
+            >
+                Katıl
+            </Button>
+        </Stack>
+    ),
+},
     ];
 
     return (

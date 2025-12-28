@@ -11,7 +11,8 @@ const navigations = [
     icon: "groups",
     children: [
       { name: "Tüm Kulüpler", path: "/clubs", iconText: "K" },
-      { name: "Yeni Kulüp", path: "/clubs/create", iconText: "Y" }
+      { name: "Yeni Kulüp", path: "/clubs/create", iconText: "Y" },
+      
     ]
   },
 

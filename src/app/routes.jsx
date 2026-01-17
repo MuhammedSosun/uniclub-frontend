@@ -10,7 +10,7 @@ import sessionRoutes from "./views/sessions/session-routes";
 import materialRoutes from "app/views/material-kit/MaterialRoutes";
 
 // CLUB ROUTES
-import ClubRoutes from "./views/clubs";   // 🔥 DOĞRU YER
+import ClubRoutes from "./views/clubs"; // 🔥 DOĞRU YER
 
 // E-CHART PAGE
 const AppEchart = Loadable(lazy(() => import("app/views/charts/echarts/AppEchart")));
@@ -22,8 +22,6 @@ const EventCreate = Loadable(lazy(() => import("app/views/events/EventCreate")))
 const About = Loadable(lazy(() => import("app/views/about/index")));
 const Profile = Loadable(lazy(() => import("app/views/account/Profile")));
 const MyAccount = Loadable(lazy(() => import("app/views/account/MyAccount")));
-
-
 
 const routes = [
   { path: "/", element: <Navigate to="dashboard/default" /> },
@@ -43,16 +41,15 @@ const routes = [
       { path: "/users", element: <UserList /> },
       { path: "/events", element: <EventList /> },
       { path: "/events/create", element: <EventCreate /> },
-      {path: "/about", element: <About />},
-      {path: "/my-account", element: <MyAccount /> },
-      {path: "/profile", element: <Profile/>},
+      { path: "/about", element: <About /> },
+      { path: "/my-account", element: <MyAccount /> },
+      { path: "/profile", element: <Profile /> },
 
-
-      ...ClubRoutes, 
-    ],
+      ...ClubRoutes
+    ]
   },
 
-  ...sessionRoutes,
+  ...sessionRoutes
 ];
 
 export default routes;

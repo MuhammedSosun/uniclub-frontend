@@ -4,7 +4,6 @@ import Close from "@mui/icons-material/Close";
 import Settings from "@mui/icons-material/Settings";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import Checkbox from "@mui/material/Checkbox";
 import Button from "@mui/material/Button";
 import Drawer from "@mui/material/Drawer";
 import styled from "@mui/material/styles/styled";

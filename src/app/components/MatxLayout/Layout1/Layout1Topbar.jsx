@@ -20,7 +20,7 @@ import useAuth from "app/hooks/useAuth";
 import useSettings from "app/hooks/useSettings";
 
 import { Span } from "app/components/Typography";
-import { MatxMenu, MatxSearchBox } from "app/components";
+import { MatxMenu } from "app/components";
 import { themeShadows } from "app/components/MatxTheme/themeColors";
 import { topBarHeight } from "app/utils/constant";
 
@@ -122,7 +122,6 @@ const Layout1Topbar = () => {
         </Box>
 
         <Box display="flex" alignItems="center">
-          <MatxSearchBox />
 
           
 

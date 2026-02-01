@@ -13,7 +13,8 @@ import {
   TableContainer,
   CircularProgress,
   Chip,
-  Stack
+  Stack,
+  TablePagination
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { toast } from "react-toastify";
@@ -23,14 +24,11 @@ import AddIcon from "@mui/icons-material/Add";
 import EventNoteIcon from "@mui/icons-material/EventNote";
 import SearchIcon from "@mui/icons-material/Search";
 
-// --- GERÇEK BACKEND SERVİSİ ---
 import eventService from "app/services/eventService";
 
-// --- TEMA RENKLERİ ---
 const yalovaRed = "#B00020";
 const primaryDark = "#1A2038";
 
-// --- STYLED COMPONENTS ---
 const StyledTableHead = styled(TableHead)(() => ({
   backgroundColor: primaryDark,
   "& .MuiTableCell-root": {
@@ -38,21 +36,19 @@ const StyledTableHead = styled(TableHead)(() => ({
     fontWeight: 700,
     fontSize: "0.9rem",
     borderBottom: `2px solid ${yalovaRed}`,
-    textTransform: "uppercase",
-  },
+    textTransform: "uppercase"
+  }
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  transition: "background-color 0.3s",
   "&:nth-of-type(odd)": {
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: theme.palette.action.hover
   },
   "&:hover": {
-    backgroundColor: "rgba(176, 0, 32, 0.1)",
-  },
+    backgroundColor: "rgba(176, 0, 32, 0.1)"
+  }
 }));
 
-// --- ETKİNLİK DURUMU RENKLERİ ---
 const getStatusColor = (status) => {
   switch (status?.toUpperCase()) {
     case "ONAYLANDI":
@@ -69,64 +65,47 @@ const getStatusColor = (status) => {
 export default function EventList() {
   const [events, setEvents] = useState([]);
   const [filter, setFilter] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [totalElements, setTotalElements] = useState(0);
+
+  const [pagination, setPagination] = useState({
+    page: 0,
+    pageSize: 5
+  });
+
   const navigate = useNavigate();
 
-  // --- İLK YÜKLEME ---
-  useEffect(() => {
-    loadEvents();
-  }, []);
-
-  // --- EVENT GETİRME ---
-  const loadEvents = async (search = "") => {
+  const loadEvents = async () => {
     setLoading(true);
     try {
-      const response = search
-        ? await eventService.searchEvents(search)
-        : await eventService.getAllEvents();
+      const response = await eventService.getUpcomingEventsPaged({
+        pageNumber: pagination.page,
+        pageSize: pagination.pageSize,
+        columnName: "eventDate",
+        asc: true,
+        filter
+      });
 
-      setEvents(response.payload ?? []);
+      setEvents(response.payload.content);
+      setTotalElements(response.payload.totalElements);
     } catch (err) {
-      toast.error("Etkinlikler yüklenirken hata oluştu!");
+      toast.error("Etkinlikler yüklenemedi");
       setEvents([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFilterChange = (e) => {
-    const v = e.target.value;
-    setFilter(v);
-    loadEvents(v);
-  };
+  useEffect(() => {
+    loadEvents();
+  }, [pagination, filter]);
 
-  const formatDateTime = (dateString) => {
-    if (!dateString) return "—";
-    return new Date(dateString).toLocaleString("tr-TR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  const formatDateTime = (date) => new Date(date).toLocaleString("tr-TR");
 
   return (
-    <Card sx={{ p: { xs: 2, md: 4 }, borderRadius: 2, boxShadow: 6 }}>
-      
-
-      {/* --- ÜST HEADER KISMI --- */}
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
-      >
-        <Typography
-          variant="h4"
-          fontWeight={700}
-          sx={{ color: primaryDark, display: "flex", alignItems: "center" }}
-        >
+    <Card sx={{ p: 4, borderRadius: 2, boxShadow: 6 }}>
+      <Stack direction="row" justifyContent="space-between" mb={3}>
+        <Typography variant="h4" fontWeight={700} sx={{ color: primaryDark }}>
           <EventNoteIcon sx={{ mr: 1, color: yalovaRed }} />
           Etkinlik Yönetimi
         </Typography>
@@ -134,113 +113,80 @@ export default function EventList() {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          sx={{
-            backgroundColor: yalovaRed,
-            "&:hover": { backgroundColor: "#8A0019" },
-            fontWeight: 700,
-            textTransform: "none",
-          }}
+          sx={{ backgroundColor: yalovaRed }}
           onClick={() => navigate("/events/create")}
         >
           Etkinlik Oluştur
         </Button>
       </Stack>
 
+      <TextField
+        label="Etkinlik Adı ile Ara"
+        size="small"
+        value={filter}
+        onChange={(e) => {
+          setFilter(e.target.value);
+          setPagination((p) => ({ ...p, page: 0 }));
+        }}
+        InputProps={{
+          startAdornment: <SearchIcon sx={{ mr: 1 }} />
+        }}
+        sx={{ mb: 3, minWidth: 300 }}
+      />
 
-      {/* ARAMA ALANI */}
-      <Box mb={3}>
-        <TextField
-          label="Etkinlik Adı ile Ara"
-          variant="outlined"
-          size="small"
-          value={filter}
-          onChange={handleFilterChange}
-          InputProps={{
-            startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />,
-          }}
-          sx={{ minWidth: 300 }}
-        />
-      </Box>
-
-
-      {/* TABLO */}
-      <TableContainer sx={{ maxHeight: 600 }}>
+      <TableContainer>
         <Table stickyHeader>
           <StyledTableHead>
             <TableRow>
-              <TableCell>Etkinlik Adı</TableCell>
-              <TableCell>Tarih & Saat</TableCell>
+              <TableCell>Etkinlik</TableCell>
+              <TableCell>Tarih</TableCell>
               <TableCell>Konum</TableCell>
               <TableCell>Durum</TableCell>
               <TableCell>Oluşturan</TableCell>
-              <TableCell>İşlemler</TableCell>
             </TableRow>
           </StyledTableHead>
 
           <TableBody>
             {loading ? (
-              <StyledTableRow>
-                <TableCell colSpan={6} align="center">
-                  <Box py={3}>
-                    <CircularProgress size={30} sx={{ color: yalovaRed }} />
-                  </Box>
+              <TableRow>
+                <TableCell colSpan={5} align="center">
+                  <CircularProgress />
                 </TableCell>
-              </StyledTableRow>
-            ) : events.length > 0 ? (
+              </TableRow>
+            ) : events.length ? (
               events.map((e) => {
-                const statusInfo = getStatusColor(e.status);
+                const s = getStatusColor(e.status);
                 return (
                   <StyledTableRow key={e.id}>
-                    <TableCell sx={{ fontWeight: 600 }}>{e.title}</TableCell>
+                    <TableCell>{e.title}</TableCell>
                     <TableCell>{formatDateTime(e.eventDate)}</TableCell>
-                    <TableCell>{e.location || "—"}</TableCell>
-
+                    <TableCell>{e.location}</TableCell>
                     <TableCell>
-                      <Chip
-                        label={statusInfo.label}
-                        size="small"
-                        sx={{
-                          backgroundColor: statusInfo.bgColor,
-                          color: primaryDark,
-                          fontWeight: 700,
-                          minWidth: 100,
-                        }}
-                      />
+                      <Chip label={s.label} sx={{ backgroundColor: s.bgColor }} />
                     </TableCell>
-
-                    <TableCell>{e.createdBy || "—"}</TableCell>
-
-                    <TableCell>
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        sx={{
-                          borderColor: yalovaRed,
-                          color: yalovaRed,
-                          "&:hover": {
-                            backgroundColor: "rgba(176, 0, 32, 0.05)",
-                            borderColor: "#8a0019",
-                          },
-                        }}
-                      >
-                        Detay
-                      </Button>
-                    </TableCell>
+                    <TableCell>{e.createdBy}</TableCell>
                   </StyledTableRow>
                 );
               })
             ) : (
-              <StyledTableRow>
-                <TableCell colSpan={6} align="center">
-                  <Typography py={3} color="text.secondary">
-                    Henüz kayıtlı etkinlik bulunmuyor.
-                  </Typography>
+              <TableRow>
+                <TableCell colSpan={5} align="center">
+                  Etkinlik bulunamadı
                 </TableCell>
-              </StyledTableRow>
+              </TableRow>
             )}
           </TableBody>
         </Table>
       </TableContainer>
+
+      <TablePagination
+        component="div"
+        count={totalElements}
+        page={pagination.page}
+        rowsPerPage={pagination.pageSize}
+        onPageChange={(_, p) => setPagination((x) => ({ ...x, page: p }))}
+        onRowsPerPageChange={(e) => setPagination({ page: 0, pageSize: +e.target.value })}
+      />
     </Card>
   );
 }

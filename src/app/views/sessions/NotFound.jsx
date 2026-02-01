@@ -118,7 +118,7 @@ export default function NotFound() {
                 variant="contained" 
                 size="large"
                 startIcon={<HomeIcon />}
-                onClick={() => navigate("/dashboard/default")}
+                onClick={() => navigate("/dashboard")}
                 sx={{
                     backgroundColor: yalovaRed,
                     color: '#fff',

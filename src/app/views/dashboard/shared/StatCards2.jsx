@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Fab from "@mui/material/Fab";
 import Card from "@mui/material/Card";
 import Grid from "@mui/material/Grid2";
@@ -6,7 +7,10 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import StarOutline from "@mui/icons-material/StarOutline";
 import TrendingUp from "@mui/icons-material/TrendingUp";
 
-// STYLED COMPONENTS
+import { getActiveMemberCount } from "app/services/memberService"; // 🔥 API
+import clubService from "app/services/clubService";
+
+// STYLED COMPONENTS (AYNI)
 const ContentBox = styled("div")(() => ({
   display: "flex",
   flexWrap: "wrap",
@@ -51,6 +55,28 @@ export default function StatCards2() {
   const { palette } = useTheme();
   const bgError = lighten(palette.error.main, 0.85);
 
+  const [memberCount, setMemberCount] = useState(null);
+  const [activeClubCount, setActiveClubCount] = useState(null);
+
+  useEffect(() => {
+    getActiveMemberCount()
+      .then((data) => {
+        setMemberCount(data.payload);
+      })
+      .catch((err) => {
+        console.error("Member count error:", err);
+      });
+
+    clubService
+      .getActiveClubsCount()
+      .then((data) => {
+        setActiveClubCount(data.payload);
+      })
+      .catch((err) => {
+        console.error("Active club count error:", err);
+      });
+  }, []);
+
   return (
     <Grid container spacing={3} sx={{ mb: 3 }}>
       <Grid size={{ md: 6, xs: 12 }}>
@@ -60,17 +86,17 @@ export default function StatCards2() {
               <TrendingUp color="success" />
             </FabIcon>
 
-            <H3 color="#08ad6c">Active Users</H3>
+            <H3 color="#08ad6c">Kullanıcı Sayısı</H3>
           </ContentBox>
 
           <ContentBox sx={{ pt: 2 }}>
-            <H1>10.8k</H1>
+            <H1>{memberCount !== null ? memberCount : "--"}</H1>
 
             <IconBox sx={{ backgroundColor: "success.main" }}>
               <ExpandLess className="icon" />
             </IconBox>
 
-            <Span color="#08ad6c">(+21%)</Span>
+            <Span color="#08ad6c">aktif</Span>
           </ContentBox>
         </Card>
       </Grid>
@@ -78,21 +104,15 @@ export default function StatCards2() {
       <Grid size={{ md: 6, xs: 12 }}>
         <Card elevation={3} sx={{ p: 2 }}>
           <ContentBox>
-            <FabIcon size="medium" sx={{ backgroundColor: bgError, overflow: "hidden" }}>
+            <FabIcon size="medium" sx={{ backgroundColor: bgError }}>
               <StarOutline color="error" />
             </FabIcon>
 
-            <H3 color="error.main">Transactions</H3>
+            <H3 color="error.main">Aktif Kulüp Sayısı</H3>
           </ContentBox>
 
           <ContentBox sx={{ pt: 2 }}>
-            <H1>$2.8M</H1>
-
-            <IconBox sx={{ backgroundColor: "error.main" }}>
-              <ExpandLess className="icon" />
-            </IconBox>
-
-            <Span color="error.main">(+21%)</Span>
+            <H1>{typeof activeClubCount === "number" ? activeClubCount : "--"}</H1>
           </ContentBox>
         </Card>
       </Grid>

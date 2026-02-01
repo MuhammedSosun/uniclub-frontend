@@ -10,41 +10,42 @@ import {
   Box,
   Typography,
   Chip,
-  useTheme,
   CircularProgress,
   TableContainer,
   Button,
+  TablePagination
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { toast } from "react-toastify";
 import SearchIcon from "@mui/icons-material/Search";
 import GroupIcon from "@mui/icons-material/Group";
 
-// Backend servisler
-import { getAllUsers, searchUsers } from "../../services/userService";
+// ✅ PAGED backend servisi
+import { getUsersPaged } from "../../services/userService";
 
 const yalovaRed = "#B00020";
 const primaryDark = "#1A2038";
 
-const StyledTableHead = styled(TableHead)(({ theme }) => ({
+/* ---------------- STYLES ---------------- */
+
+const StyledTableHead = styled(TableHead)(() => ({
   backgroundColor: primaryDark,
   "& .MuiTableCell-root": {
     color: yalovaRed,
     fontWeight: 700,
     fontSize: "0.9rem",
     borderBottom: `2px solid ${yalovaRed}`,
-    textTransform: "uppercase",
-  },
+    textTransform: "uppercase"
+  }
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  transition: "background-color 0.3s",
   "&:nth-of-type(odd)": {
-    backgroundColor: theme.palette.action.hover,
+    backgroundColor: theme.palette.action.hover
   },
   "&:hover": {
-    backgroundColor: "rgba(176, 0, 32, 0.1)",
-  },
+    backgroundColor: "rgba(176, 0, 32, 0.1)"
+  }
 }));
 
 const getRoleColor = (role) => {
@@ -58,50 +59,58 @@ const getRoleColor = (role) => {
   }
 };
 
+/* ---------------- COMPONENT ---------------- */
+
 export default function UserList() {
   const [users, setUsers] = useState([]);
+  const [totalElements, setTotalElements] = useState(0);
+  const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    loadUsers();
-  }, []);
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 10
+  });
+
+  /* ---------- LOAD USERS ---------- */
 
   const loadUsers = async () => {
     setLoading(true);
     try {
-      const response = await getAllUsers();
-      setUsers(response.payload ?? []);  // RootEntity.data
-    } catch (err) {
-      toast.error("Kullanıcılar yüklenirken hata oluştu!");
+      const response = await getUsersPaged({
+        pageNumber: paginationModel.page,
+        pageSize: paginationModel.pageSize,
+        columnName: "id",
+        asc: true,
+        filter
+      });
+
+      setUsers(response.payload.content);
+      setTotalElements(response.payload.totalElements);
+    } catch (e) {
+      toast.error("Kullanıcılar yüklenemedi");
       setUsers([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleFilterChange = async (e) => {
-    const value = e.target.value;
-    setFilter(value);
+  useEffect(() => {
+    loadUsers();
+  }, [paginationModel, filter]);
 
-    setLoading(true);
-    try {
-      if (value.trim() === "") {
-        loadUsers();
-        return;
-      }
+  /* ---------- FILTER ---------- */
 
-      const response = await searchUsers(value);
-      setUsers(response.payload ?? []);
-    } catch (err) {
-      toast.error("Arama yapılırken hata oluştu!");
-    } finally {
-      setLoading(false);
-    }
+  const handleFilterChange = (e) => {
+    setFilter(e.target.value);
+    setPaginationModel((p) => ({ ...p, page: 0 })); // 🔑 başa dön
   };
+
+  /* ---------------- RENDER ---------------- */
 
   return (
     <Card sx={{ p: { xs: 2, md: 4 }, borderRadius: 2, boxShadow: 6 }}>
+      {/* HEADER */}
       <Box
         sx={{
           display: "flex",
@@ -109,7 +118,7 @@ export default function UserList() {
           justifyContent: "space-between",
           alignItems: "center",
           mb: 3,
-          gap: 2,
+          gap: 2
         }}
       >
         <Typography
@@ -127,12 +136,13 @@ export default function UserList() {
           onChange={handleFilterChange}
           size="small"
           InputProps={{
-            startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />,
+            startAdornment: <SearchIcon color="action" sx={{ mr: 1 }} />
           }}
           sx={{ minWidth: { sm: 300, xs: "100%" } }}
         />
       </Box>
 
+      {/* TABLE */}
       <TableContainer sx={{ maxHeight: 600 }}>
         <Table stickyHeader>
           <StyledTableHead>
@@ -169,25 +179,18 @@ export default function UserList() {
                           backgroundColor: roleInfo.bgColor,
                           color: primaryDark,
                           fontWeight: 700,
-                          minWidth: 110,
+                          minWidth: 110
                         }}
                       />
                     </TableCell>
-
-                    <TableCell>
-                      {new Date(u.createdAt).toLocaleDateString("tr-TR")}
-                    </TableCell>
-
+                    <TableCell>{new Date(u.createdAt).toLocaleDateString("tr-TR")}</TableCell>
                     <TableCell>
                       <Button
                         size="small"
                         variant="outlined"
                         sx={{
                           borderColor: yalovaRed,
-                          color: yalovaRed,
-                          "&:hover": {
-                            backgroundColor: "rgba(176, 0, 32, 0.05)",
-                          },
+                          color: yalovaRed
                         }}
                       >
                         Görüntüle
@@ -208,6 +211,22 @@ export default function UserList() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* PAGINATION */}
+      <TablePagination
+        component="div"
+        count={totalElements}
+        page={paginationModel.page}
+        rowsPerPage={paginationModel.pageSize}
+        onPageChange={(_, newPage) => setPaginationModel((p) => ({ ...p, page: newPage }))}
+        onRowsPerPageChange={(e) =>
+          setPaginationModel({
+            page: 0,
+            pageSize: parseInt(e.target.value, 10)
+          })
+        }
+        rowsPerPageOptions={[5, 10, 20, 50]}
+      />
     </Card>
   );
 }

@@ -161,7 +161,7 @@ export default function Profile() {
             try {
               // memberService.updateMyProfile çağrısı
               await memberService.updateMyProfile(values);
-              navigate("/dashboard/default");
+              navigate("/dashboard");
             } catch (e) {
               setSubmitError("Profil güncellenirken bir hata oluştu. Lütfen bilgileri kontrol edin.");
             } finally {
@@ -397,7 +397,7 @@ export default function Profile() {
                 <Button
                   variant="text"
                   color="secondary"
-                  onClick={() => navigate("/dashboard/default")}
+                  onClick={() => navigate("/dashboard")}
                 >
                   Şimdi Atla / İptal Et
                 </Button>

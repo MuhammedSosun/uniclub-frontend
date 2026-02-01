@@ -11,4 +11,8 @@ const memberService = {
     api.put(`${MEMBER_BASE}/me`, profileData),
 };
 
+export const getActiveMemberCount = async () => {
+  return api.get(`${MEMBER_BASE}/count`);
+};
+
 export default memberService;

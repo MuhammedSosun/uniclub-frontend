@@ -122,9 +122,9 @@ export default function JwtLogin() {
 
       // 🔥 ROL KONTROL + YÖNLENDİRME
       if (decoded.role === "ADMIN") {
-        navigate("/dashboard/default");
+        navigate("/dashboard");
       } else {
-        navigate("/dashboard/default");
+        navigate("/dashboard");
       }
 
     } catch (error) {

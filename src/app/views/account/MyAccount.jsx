@@ -11,7 +11,7 @@ import {
   Avatar,
   Chip,
   Link, // Link bileşenini kullanmak için eklendi
-  Paper, // Bölüm başlıkları için eklendi
+  Paper // Bölüm başlıkları için eklendi
 } from "@mui/material";
 
 import PersonIcon from "@mui/icons-material/Person";
@@ -54,26 +54,43 @@ export default function MyAccount() {
   if (!profile) return null;
 
   // Profil durumuna göre dinamik renk ve etiket
-  const statusColor = profile.status === "APPROVED" ? "success" : profile.status === "INCOMPLETE" ? "warning" : "error";
-  const statusLabel = profile.status === "APPROVED" ? "Onaylandı" : profile.status === "INCOMPLETE" ? "Eksik Bilgi" : profile.status;
+  const statusColor =
+    profile.status === "APPROVED"
+      ? "success"
+      : profile.status === "INCOMPLETE"
+        ? "warning"
+        : "error";
+  const statusLabel =
+    profile.status === "APPROVED"
+      ? "Onaylandı"
+      : profile.status === "INCOMPLETE"
+        ? "Eksik Bilgi"
+        : profile.status;
 
   return (
     // UniClub Dashboard genişliğine uygun merkezleme ve arkaplan
-    <Box px={2} py={4} sx={{ backgroundColor: '#f4f6f8', minHeight: '100vh' }}>
-      <Card sx={{
-        maxWidth: 1000,
-        mx: "auto",
-        p: { xs: 3, sm: 5 },
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)', // Hafif gölgelendirme
-        borderRadius: 2
-      }}>
-        
+    <Box px={2} py={4} sx={{ backgroundColor: "#f4f6f8", minHeight: "100vh" }}>
+      <Card
+        sx={{
+          maxWidth: 1000,
+          mx: "auto",
+          p: { xs: 3, sm: 5 },
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)", // Hafif gölgelendirme
+          borderRadius: 2
+        }}
+      >
         {/* HEADER: KİŞİSEL BİLGİLER */}
-        <Box display="flex" flexDirection={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'flex-start', sm: 'center' }} gap={3} mb={4}>
+        <Box
+          display="flex"
+          flexDirection={{ xs: "column", sm: "row" }}
+          alignItems={{ xs: "flex-start", sm: "center" }}
+          gap={3}
+          mb={4}
+        >
           <Avatar
             alt={`${profile.name} ${profile.surname}`}
             src={profile.profilePhotoPath} // Eğer varsa fotoğraf yolu kullanılmalı
-            sx={{ width: 96, height: 96, bgcolor: 'primary.light' }} // Daha büyük avatar
+            sx={{ width: 96, height: 96, bgcolor: "primary.light" }} // Daha büyük avatar
           >
             {!profile.profilePhotoPath && <PersonIcon sx={{ fontSize: 50 }} />}
           </Avatar>
@@ -114,7 +131,7 @@ export default function MyAccount() {
 
         {/* BÖLÜM 2: HAKKIMDA */}
         <SectionHeader title="Hakkımda" />
-        <Typography variant="body1" sx={{ color: 'text.primary', lineHeight: 1.7, mb: 0 }}>
+        <Typography variant="body1" sx={{ color: "text.primary", lineHeight: 1.7, mb: 0 }}>
           {profile.about || "Henüz bir açıklama eklenmemiş."}
         </Typography>
 
@@ -123,23 +140,23 @@ export default function MyAccount() {
         {/* BÖLÜM 3: YETENEKLER VE LİSTELER */}
         <SectionHeader title="Yetenekler ve Bilgiler" />
         <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <Section title="Yetenekler" items={profile.skills} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Section title="İlgi Alanları" items={profile.interests} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Section title="Sertifikalar" items={profile.certificates} />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Section title="Bildiği Diller" items={profile.languages} />
-            </Grid>
-            <Grid item xs={12}>
-              <Section title="Projeler" items={profile.projects} />
-            </Grid>
+          <Grid item xs={12} sm={6}>
+            <Section title="Yetenekler" items={profile.skills} />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <Section title="İlgi Alanları" items={profile.interests} />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <Section title="Sertifikalar" items={profile.certificates} />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <Section title="Bildiği Diller" items={profile.languages} />
+          </Grid>
+          <Grid item xs={12}>
+            <Section title="Projeler" items={profile.projects} />
+          </Grid>
         </Grid>
-        
+
         <Divider sx={{ my: 4 }} />
 
         {/* BÖLÜM 4: SOSYAL MEDYA LİNKLERİ */}
@@ -158,7 +175,7 @@ export default function MyAccount() {
             variant="contained"
             color="primary"
             size="large"
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate("/profile/edit")}
           >
             Profilimi Düzenle
           </Button>
@@ -172,13 +189,13 @@ export default function MyAccount() {
 
 // Özel Bölüm Başlığı Bileşeni (UniClub'daki Kart stiline benzer)
 const SectionHeader = ({ title }) => (
-  <Paper 
-    elevation={0} 
-    sx={{ 
-      p: 1.5, 
-      mb: 3, 
-      backgroundColor: '#e3f2fd', // Açık mavi (UniClub primary.light)
-      borderLeft: '4px solid #1976d2', // Mavi vurgu
+  <Paper
+    elevation={0}
+    sx={{
+      p: 1.5,
+      mb: 3,
+      backgroundColor: "#e3f2fd", // Açık mavi (UniClub primary.light)
+      borderLeft: "4px solid #1976d2", // Mavi vurgu
       borderRadius: 1
     }}
   >
@@ -191,19 +208,25 @@ const SectionHeader = ({ title }) => (
 // Bilgi Alanı Bileşeni
 function Info({ label, value, link, icon: IconComponent }) {
   if (!value) return null;
-  
+
   // Link için uygun URL formatlama (eğer link ise ve http/https içermiyorsa ekle)
-  const formattedValue = link && !value.includes('http') ? `https://${value}` : value;
+  const formattedValue = link && !value.includes("http") ? `https://${value}` : value;
 
   return (
     <Grid item xs={12} sm={6}>
-      <Typography variant="caption" color="text.secondary" fontWeight={500} display="block" mb={0.2}>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        fontWeight={500}
+        display="block"
+        mb={0.2}
+      >
         {label}
       </Typography>
 
       <Box display="flex" alignItems="center" gap={1}>
-        {IconComponent && <IconComponent sx={{ fontSize: 18, color: 'text.secondary' }} />}
-        
+        {IconComponent && <IconComponent sx={{ fontSize: 18, color: "text.secondary" }} />}
+
         {link ? (
           <Link
             variant="body1" // body2 yerine body1, daha okunaklı
@@ -215,7 +238,9 @@ function Info({ label, value, link, icon: IconComponent }) {
             {value}
           </Link>
         ) : (
-          <Typography variant="body1" fontWeight={500}>{value}</Typography>
+          <Typography variant="body1" fontWeight={500}>
+            {value}
+          </Typography>
         )}
       </Box>
     </Grid>
@@ -234,13 +259,13 @@ function Section({ title, items = [] }) {
 
       <Box display="flex" flexWrap="wrap" gap={1}>
         {items.map((item, i) => (
-          <Chip 
-            key={i} 
-            label={item} 
-            color="primary" 
+          <Chip
+            key={i}
+            label={item}
+            color="primary"
             variant="outlined" // Beyaz kart üzerinde daha temiz durur
             size="medium"
-            sx={{ fontWeight: 500 }} 
+            sx={{ fontWeight: 500 }}
           />
         ))}
       </Box>

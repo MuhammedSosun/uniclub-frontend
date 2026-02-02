@@ -4,15 +4,15 @@ const navigations = [
   // 🔥 MY ACCOUNT
   { name: "Hesabım", path: "/my-account", icon: "person" },
 
-  { name: "Kullanıcılar", path: "/users", icon: "group" },
+  // ✅ GÜNCELLENEN KISIM: Kullanıcılar -> Üyeler
+  { name: "Üyeler", path: "/members", icon: "group" },
 
   {
     name: "Kulüpler",
     icon: "groups",
     children: [
       { name: "Tüm Kulüpler", path: "/clubs", iconText: "K" },
-      { name: "Yeni Kulüp", path: "/clubs/create", iconText: "Y" },
-      
+      { name: "Yeni Kulüp", path: "/clubs/create", iconText: "Y" }
     ]
   },
 
@@ -42,6 +42,6 @@ const navigations = [
     icon: "launch",
     path: "/about"
   }
-]
+];
 
 export default navigations;

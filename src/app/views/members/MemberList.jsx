@@ -13,15 +13,20 @@ import {
   CircularProgress,
   TableContainer,
   Button,
-  TablePagination
+  TablePagination,
+  Tooltip,
+  IconButton
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { toast } from "react-toastify";
 import SearchIcon from "@mui/icons-material/Search";
 import GroupIcon from "@mui/icons-material/Group";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
+import { useNavigate } from "react-router-dom";
 
-// ✅ PAGED backend servisi
-import { getUsersPaged } from "../../services/userService";
+// ✅ YENİ: Member Servisi (Dosya yolunu kendi projene göre kontrol et)
+import memberService from "../../services/memberService";
 
 const yalovaRed = "#B00020";
 const primaryDark = "#1A2038";
@@ -48,21 +53,25 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   }
 }));
 
-const getRoleColor = (role) => {
-  switch (role?.toUpperCase()) {
-    case "ADMIN":
-      return { label: "YÖNETİCİ", bgColor: "#FFCDD2" };
-    case "CLUB_MANAGER":
-      return { label: "KULÜP BAŞKANI", bgColor: "#BBDEFB" };
+// Durum Renklendirmesi
+const getStatusColor = (status) => {
+  switch (status) {
+    case "ACTIVE":
+      return { label: "AKTİF", color: "success" };
+    case "PASSIVE":
+      return { label: "PASİF", color: "warning" };
+    case "INCOMPLETED":
+      return { label: "TAMAMLANMADI", color: "error" };
     default:
-      return { label: "ÖĞRENCİ ÜYE", bgColor: "#f0f0f0" };
+      return { label: status, color: "default" };
   }
 };
 
 /* ---------------- COMPONENT ---------------- */
 
-export default function UserList() {
-  const [users, setUsers] = useState([]);
+export default function MemberList() {
+  const navigate = useNavigate();
+  const [members, setMembers] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
   const [loading, setLoading] = useState(false);
   const [filter, setFilter] = useState("");
@@ -72,38 +81,43 @@ export default function UserList() {
     pageSize: 10
   });
 
-  /* ---------- LOAD USERS ---------- */
+  /* ---------- LOAD MEMBERS ---------- */
 
-  const loadUsers = async () => {
+  const loadMembers = async () => {
     setLoading(true);
     try {
-      const response = await getUsersPaged({
-        pageNumber: paginationModel.page,
-        pageSize: paginationModel.pageSize,
-        columnName: "id",
-        asc: true,
+      // ✅ MemberService üzerinden çağırıyoruz
+      const response = await memberService.getAllPaged({
+        page: paginationModel.page,
+        size: paginationModel.pageSize, // Backend 'size' parametresi bekliyorsa
         filter
       });
 
-      setUsers(response.payload.content);
-      setTotalElements(response.payload.totalElements);
+      // Backend yapına göre payload'ı al
+      const data = response.data?.payload || response.payload;
+
+      if (data) {
+        setMembers(data.content);
+        setTotalElements(data.totalElements);
+      }
     } catch (e) {
-      toast.error("Kullanıcılar yüklenemedi");
-      setUsers([]);
+      console.error(e);
+      toast.error("Üye listesi yüklenemedi");
+      setMembers([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadUsers();
+    loadMembers();
   }, [paginationModel, filter]);
 
   /* ---------- FILTER ---------- */
 
   const handleFilterChange = (e) => {
     setFilter(e.target.value);
-    setPaginationModel((p) => ({ ...p, page: 0 })); // 🔑 başa dön
+    setPaginationModel((p) => ({ ...p, page: 0 })); // Başa dön
   };
 
   /* ---------------- RENDER ---------------- */
@@ -127,11 +141,11 @@ export default function UserList() {
           sx={{ color: primaryDark, display: "flex", alignItems: "center" }}
         >
           <GroupIcon sx={{ mr: 1, color: yalovaRed }} />
-          Kullanıcı Listesi Yönetimi
+          Üye Listesi Yönetimi
         </Typography>
 
         <TextField
-          label="Öğrenci No veya E-posta ile Ara"
+          label="Ad, Soyad veya Öğrenci No Ara"
           value={filter}
           onChange={handleFilterChange}
           size="small"
@@ -148,62 +162,72 @@ export default function UserList() {
           <StyledTableHead>
             <TableRow>
               <TableCell>Öğrenci No</TableCell>
+              <TableCell>Ad</TableCell>
+              <TableCell>Soyad</TableCell>
               <TableCell>E-posta</TableCell>
-              <TableCell>Rol</TableCell>
-              <TableCell>Kayıt Tarihi</TableCell>
-              <TableCell>İşlemler</TableCell>
+              <TableCell>Durum</TableCell>
+              <TableCell align="right">İşlemler</TableCell>
             </TableRow>
           </StyledTableHead>
 
           <TableBody>
             {loading ? (
               <StyledTableRow>
-                <TableCell colSpan={5} align="center">
+                <TableCell colSpan={6} align="center">
                   <Box py={3}>
                     <CircularProgress size={30} sx={{ color: yalovaRed }} />
                   </Box>
                 </TableCell>
               </StyledTableRow>
-            ) : users.length > 0 ? (
-              users.map((u) => {
-                const roleInfo = getRoleColor(u.role);
+            ) : members.length > 0 ? (
+              members.map((m) => {
+                const statusInfo = getStatusColor(m.status);
                 return (
-                  <StyledTableRow key={u.id}>
-                    <TableCell sx={{ fontWeight: 600 }}>{u.username}</TableCell>
-                    <TableCell>{u.email}</TableCell>
+                  <StyledTableRow key={m.id}>
+                    <TableCell sx={{ fontWeight: 600 }}>{m.studentNumber}</TableCell>
+                    <TableCell>{m.name}</TableCell>
+                    <TableCell>{m.surname}</TableCell>
+                    <TableCell>{m.email}</TableCell>
                     <TableCell>
                       <Chip
-                        label={roleInfo.label}
-                        size="small"
-                        sx={{
-                          backgroundColor: roleInfo.bgColor,
-                          color: primaryDark,
-                          fontWeight: 700,
-                          minWidth: 110
-                        }}
-                      />
-                    </TableCell>
-                    <TableCell>{new Date(u.createdAt).toLocaleDateString("tr-TR")}</TableCell>
-                    <TableCell>
-                      <Button
+                        label={statusInfo.label}
+                        color={statusInfo.color}
                         size="small"
                         variant="outlined"
-                        sx={{
-                          borderColor: yalovaRed,
-                          color: yalovaRed
-                        }}
-                      >
-                        Görüntüle
-                      </Button>
+                        sx={{ fontWeight: 700, minWidth: 90 }}
+                      />
+                    </TableCell>
+                    <TableCell align="right">
+                      <Box display="flex" justifyContent="flex-end" gap={1}>
+                        <Tooltip title="Detay">
+                          <IconButton
+                            size="small"
+                            sx={{ color: primaryDark }}
+                            onClick={() => navigate(`/members/detail/${m.id}`)}
+                          >
+                            <VisibilityIcon />
+                          </IconButton>
+                        </Tooltip>
+
+                        <Tooltip title="Düzenle">
+                          <IconButton
+                            size="small"
+                            sx={{ color: yalovaRed }}
+                            onClick={() => navigate(`/members/edit/${m.id}`)}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
                     </TableCell>
                   </StyledTableRow>
                 );
               })
             ) : (
               <StyledTableRow>
-                <TableCell colSpan={5} align="center">
+                <TableCell colSpan={6} align="center">
                   <Typography py={3} color="text.secondary">
-                    Kullanıcı bulunamadı.
+                    Kayıtlı üye bulunamadı.
                   </Typography>
                 </TableCell>
               </StyledTableRow>
@@ -226,6 +250,7 @@ export default function UserList() {
           })
         }
         rowsPerPageOptions={[5, 10, 20, 50]}
+        labelRowsPerPage="Sayfa başına:"
       />
     </Card>
   );

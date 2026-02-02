@@ -3,12 +3,12 @@ import api from "./api";
 const MEMBER_BASE = "/member";
 
 const memberService = {
-  // GET /api/member/me
   getMyProfile: () => api.get(`${MEMBER_BASE}/me`),
 
-  // PUT /api/member/me
-  updateMyProfile: (profileData) =>
-    api.put(`${MEMBER_BASE}/me`, profileData),
+  updateMyProfile: (profileData) => api.put(`${MEMBER_BASE}/me`, profileData),
+  getById: (id) => api.get(`${MEMBER_BASE}/${id}`),
+
+  getAllPaged: (params) => api.get(MEMBER_BASE, { params })
 };
 
 export const getActiveMemberCount = async () => {

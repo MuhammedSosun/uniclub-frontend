@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useEffect, useState } from "react"; // 🔥 useEffect ve useState eklendi
 import { Link } from "react-router-dom";
 import Box from "@mui/material/Box";
 import Avatar from "@mui/material/Avatar";
@@ -23,6 +23,9 @@ import { Span } from "app/components/Typography";
 import { MatxMenu } from "app/components";
 import { themeShadows } from "app/components/MatxTheme/themeColors";
 import { topBarHeight } from "app/utils/constant";
+
+// 🔥 Servis importu eklendi
+import memberService from "app/services/memberService";
 
 // STYLED COMPONENTS
 const StyledIconButton = styled(IconButton)(({ theme }) => ({
@@ -83,6 +86,28 @@ const Layout1Topbar = () => {
   const { logout, user } = useAuth();
   const isMdScreen = useMediaQuery(theme.breakpoints.down("md"));
 
+  // 🔥 STATE: Görünen ismi tutacak değişken (Başlangıçta username olsun)
+  const [memberName, setMemberName] = useState(user?.username || "User");
+
+  // 🔥 USE EFFECT: Profil bilgisini çek
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await memberService.getMyProfile();
+        const data = response.data?.payload || response.payload;
+
+        if (data && data.name && data.surname) {
+          // Ad ve Soyad'ı birleştirip state'e atıyoruz
+          setMemberName(`${data.name} ${data.surname}`);
+        }
+      } catch (error) {
+        console.error("Profil bilgisi alınamadı, username kullanılıyor.", error);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
   const updateSidebarMode = (sidebarSettings) => {
     updateSettings({ layout1Settings: { leftSidebar: { ...sidebarSettings } } });
   };
@@ -122,22 +147,21 @@ const Layout1Topbar = () => {
         </Box>
 
         <Box display="flex" alignItems="center">
-
-          
-
-
           <MatxMenu
             menuButton={
               <UserMenu>
                 <Span>
-                  Hi <strong>{user?.username}</strong>
+                  {/* 🔥 BURASI GÜNCELLENDİ: Artık memberName yazıyor */}
+                  Hi <strong>{memberName}</strong>
                 </Span>
 
                 <Avatar sx={{ cursor: "pointer" }}>
-        {user?.username?.charAt(0).toUpperCase()}
-      </Avatar>
+                  {/* Avatar harfi de ismin baş harfi olsun */}
+                  {memberName?.charAt(0).toUpperCase()}
+                </Avatar>
               </UserMenu>
-            }>
+            }
+          >
             <StyledItem>
               <Link to="/">
                 <Home />
@@ -146,12 +170,11 @@ const Layout1Topbar = () => {
             </StyledItem>
 
             <StyledItem>
-  <Link to="/profile">
-    <Person />
-    <Span sx={{ marginInlineStart: 1 }}>Profile</Span>
-  </Link>
-</StyledItem>
-
+              <Link to="/profile">
+                <Person />
+                <Span sx={{ marginInlineStart: 1 }}>Profile</Span>
+              </Link>
+            </StyledItem>
 
             <StyledItem>
               <Settings />

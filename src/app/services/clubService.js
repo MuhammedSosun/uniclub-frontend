@@ -42,6 +42,8 @@ const clubService = {
 
   // ACTIVATE
   activateClub: (id) => api.patch(`${CLUB_BASE}/${id}/activate`),
+  // clubService.js
+  getMyClub: () => api.get("/clubs/my-club"),
   // SEARCH CLUBS BY NAME
   searchClubs: (name, page = 0, size = 20) =>
     api.get(`/clubs/search`, {

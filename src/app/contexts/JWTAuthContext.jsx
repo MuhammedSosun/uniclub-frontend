@@ -9,7 +9,7 @@ axios.defaults.baseURL = "http://localhost:8080/api";
 const initialState = {
   user: null,
   isInitialized: false,
-  isAuthenticated: false,
+  isAuthenticated: false
 };
 
 // 🔹 Token doğrulama
@@ -17,7 +17,6 @@ const isValidToken = (accessToken) => {
   if (!accessToken) return false;
   try {
     const decoded = jwtDecode(accessToken);
-    // Eğer token içinde exp varsa süresi dolmamış mı kontrol et
     const currentTime = Date.now() / 1000;
     if (decoded.exp && decoded.exp < currentTime) return false;
     return true;
@@ -61,30 +60,68 @@ const reducer = (state, action) => {
 
 const AuthContext = createContext({
   ...initialState,
-  method: "JWT",
+  method: "JWT"
 });
 
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   // 🔹 LOGIN → kullanıcı numarasıyla giriş
+  // 🔹 LOGIN → kullanıcı numarasıyla giriş
   const login = async (username, password) => {
-    const { data } = await axios.post("/auth/authenticate", { username, password });
+    try {
+      const response = await axios.post("/auth/authenticate", { username, password });
 
-    const accessToken = data.accessToken || data.payload?.accessToken;
-    const refreshToken = data.refreshToken || data.payload?.refreshToken;
-    const user = data.payload
-      ? {
-          username: data.payload.username,
-          email: data.payload.email,
-          role: data.payload.role,
+      // 🔥 DEBUG: Backend'den gelen ham veriyi görelim
+      console.log("🛑 [DEBUG] Backend Login Yanıtı:", response.data);
+
+      const data = response.data;
+
+      // Token'ları al (Farklı isimlendirmeleri kontrol ediyoruz)
+      const accessToken = data.accessToken || data.payload?.accessToken || data.token;
+      const refreshToken = data.refreshToken || data.payload?.refreshToken;
+
+      // User bilgisini bulmaya çalışıyoruz
+      // 1. İhtimal: data.payload içinde user objesi var mı?
+      // 2. İhtimal: data.user var mı?
+      // 3. İhtimal: data.payload'ın kendisi user mı?
+      let userData = data.payload?.user || data.user || data.payload || {};
+
+      // Eğer payload içinde accessToken varsa ve payload'ın geri kalanı user ise:
+      if (data.payload && data.payload.accessToken) {
+        // Token payload içindeyse, user bilgileri muhtemelen aynı seviyededir veya ayrıdır.
+        // Genelde şu yapıda olabilir: { payload: { accessToken: "...", id: 123, username: "..." } }
+        userData = data.payload;
+      }
+
+      console.log("🛑 [DEBUG] Tespit Edilen User Data:", userData);
+
+      const user = {
+        id: userData.id || userData.userId, // ID burada mı?
+        username: userData.username || username,
+        email: userData.email,
+        role: userData.role
+      };
+
+      if (accessToken) {
+        setSession(accessToken);
+        if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
+
+        // 🔥 ID KAYDETME (Çoklu kontrol)
+        if (user.id) {
+          localStorage.setItem("userId", user.id);
+          console.log("✅ LOGIN BAŞARILI: User ID kaydedildi:", user.id);
+        } else {
+          console.error(
+            "❌ LOGIN UYARISI: User ID bulunamadı! Lütfen yukarıdaki [DEBUG] çıktılarına bak."
+          );
         }
-      : {};
 
-    if (accessToken) {
-      setSession(accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
-      dispatch({ type: "LOGIN", payload: { user } });
+        dispatch({ type: "LOGIN", payload: { user } });
+      }
+    } catch (error) {
+      console.error("Login Hatası:", error);
+      throw error; // Hatayı fırlat ki Login sayfası yakalasın
     }
   };
 
@@ -94,12 +131,20 @@ export const AuthProvider = ({ children }) => {
 
     const accessToken = data.accessToken || data.payload?.accessToken;
     const refreshToken = data.refreshToken || data.payload?.refreshToken;
-    const username = email.split("@")[0]; // 210101068@ogrenci.yalova.edu.tr → 210101068
-    const user = { username, email };
+
+    // Register sonrası ID dönüyorsa onu da kaydetmeliyiz
+    const payloadUser = data.payload || {};
+    const username = email.split("@")[0];
+    const user = { username, email, id: payloadUser.id };
 
     if (accessToken) {
       setSession(accessToken);
       localStorage.setItem("refreshToken", refreshToken);
+
+      if (payloadUser.id) {
+        localStorage.setItem("userId", payloadUser.id);
+      }
+
       dispatch({ type: "REGISTER", payload: { user } });
     }
   };
@@ -108,6 +153,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setSession(null);
     localStorage.removeItem("refreshToken");
+    localStorage.removeItem("userId"); // Çıkış yapınca ID'yi de silelim
     dispatch({ type: "LOGOUT" });
   };
 
@@ -118,28 +164,32 @@ export const AuthProvider = ({ children }) => {
         const accessToken = localStorage.getItem("accessToken");
         if (accessToken && isValidToken(accessToken)) {
           setSession(accessToken);
-          // backend’de /auth/profile yoksa bu kısım fake kullanıcıyı set eder
           const decoded = jwtDecode(accessToken);
+
+          // Sayfa yenilendiğinde userId local storage'da varsa onu kullanmaya devam edelim
+          const storedUserId = localStorage.getItem("userId");
+
           dispatch({
             type: "INIT",
             payload: {
               isAuthenticated: true,
               user: {
-                username: decoded.sub, // token içinde sub alanı varsa
-              },
-            },
+                id: storedUserId, // State'e de geri yükleyelim
+                username: decoded.sub
+              }
+            }
           });
         } else {
           dispatch({
             type: "INIT",
-            payload: { isAuthenticated: false, user: null },
+            payload: { isAuthenticated: false, user: null }
           });
         }
       } catch (error) {
         console.error(error);
         dispatch({
           type: "INIT",
-          payload: { isAuthenticated: false, user: null },
+          payload: { isAuthenticated: false, user: null }
         });
       }
     })();
@@ -154,7 +204,7 @@ export const AuthProvider = ({ children }) => {
         method: "JWT",
         login,
         register,
-        logout,
+        logout
       }}
     >
       {children}

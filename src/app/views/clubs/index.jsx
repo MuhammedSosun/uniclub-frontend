@@ -7,12 +7,14 @@ const ClubUpdate = Loadable(lazy(() => import("./ClubUpdate")));
 const ClubDetail = Loadable(lazy(() => import("./ClubDetail")));
 const ClubMembers = Loadable(lazy(() => import("./ClubMembers")));
 const ClubMembersManage = Loadable(lazy(() => import("./ClubMembersManage")));
+const ClubUpsert = Loadable(lazy(() => import("./Upsert")));
 
 const ClubRoutes = [
   { path: "clubs", element: <ClubList /> },
   { path: "clubs/create", element: <ClubCreate /> },
   { path: "clubs/update/:id", element: <ClubUpdate /> },
   { path: "clubs/detail/:id", element: <ClubDetail /> },
+  { path: "clubs/upsert", element: <ClubUpsert /> },
 
   // 👇 SADECE LİSTELEME
   {

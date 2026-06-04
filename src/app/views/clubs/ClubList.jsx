@@ -166,7 +166,7 @@ export default function ClubList() {
               variant="contained"
               color="warning"
               size="small"
-              onClick={() => navigate(`/clubs/update/${row.id}`)}
+              onClick={() => navigate(`/clubs/upsert?id=${row.id}`)}
             >
               Düzenle
             </Button>

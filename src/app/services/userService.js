@@ -11,7 +11,7 @@ export const loginUser = async (data) => {
 
   // ✔ token kaydediliyor
   if (response?.data?.accessToken) {
-    localStorage.setItem("accessToken", response.accessToken);
+    localStorage.setItem("accessToken", response?.accessToken);
   }
 
   return response;
@@ -58,5 +58,3 @@ export const logoutUser = async () => {
   localStorage.removeItem("accessToken");
   return api.post("/auth/logout");
 };
-
-

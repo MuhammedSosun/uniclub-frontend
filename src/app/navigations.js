@@ -12,7 +12,7 @@ const navigations = [
     icon: "groups",
     children: [
       { name: "Tüm Kulüpler", path: "/clubs", iconText: "K" },
-      { name: "Yeni Kulüp", path: "/clubs/create", iconText: "Y" }
+      { name: "Yeni Kulüp", path: "/clubs/upsert", iconText: "Y" }
     ]
   },
 
@@ -26,17 +26,10 @@ const navigations = [
     children: [
       { name: "Sign in", iconText: "SI", path: "/session/signin" },
       { name: "Sign up", iconText: "SU", path: "/session/signup" },
-      { name: "Forgot Password", iconText: "FP", path: "/session/forgot-password" },
-      { name: "Error", iconText: "404", path: "/session/404" }
+      { name: "Forgot Password", iconText: "FP", path: "/session/forgot-password" }
     ]
   },
-
-  {
-    name: "Charts",
-    icon: "trending_up",
-    children: [{ name: "Echarts", path: "/charts/echarts", iconText: "E" }]
-  },
-
+  { name: "AI Önerileri", path: "/ai-recommendations", icon: "smart_toy" },
   {
     name: "About",
     icon: "launch",

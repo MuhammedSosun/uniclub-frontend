@@ -19,6 +19,7 @@ import ProfileHeader from "./components/ProfileHeader";
 import AcademicInfo from "./components/AcademicInfo";
 import SocialMediaLinks from "./components/SocialMediaLinks";
 import MultiValueInput from "./components/MultiValueInput";
+import About from "../account/components/About";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -62,6 +63,11 @@ export default function Profile() {
           {({ values, handleChange, handleSubmit, isSubmitting }) => (
             <Box component="form" onSubmit={handleSubmit} sx={{ p: 5 }}>
               <Stack spacing={4}>
+                <Typography variant="h6" fontWeight={700} color="primary">
+                  Hakkımda
+                </Typography>
+                <About values={values} handleChange={handleChange} />
+                <Divider />
                 {/* 1. Akademik Bölüm */}
                 <Typography variant="h6" fontWeight={700} color="primary">
                   Akademik Bilgiler

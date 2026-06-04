@@ -5,15 +5,7 @@ import { jwtDecode } from "jwt-decode";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import {
-  Box,
-  Card,
-  Grid,
-  Checkbox,
-  TextField,
-  Typography,
-  Button
-} from "@mui/material";
+import { Box, Card, Grid, Checkbox, TextField, Typography, Button } from "@mui/material";
 
 import { styled, useTheme } from "@mui/material/styles";
 import PersonIcon from "@mui/icons-material/Person";
@@ -23,7 +15,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 
 import { useState } from "react";
-import useAuth from "app/hooks/useAuth";   // ✔ GERÇEK HOOK
+import useAuth from "app/hooks/useAuth"; // ✔ GERÇEK HOOK
 
 // 🔴 Yalova renk paleti
 const yalovaRed = "#B00020";
@@ -82,9 +74,7 @@ const initialValues = {
 // ✔ Validasyon
 const validationSchema = Yup.object().shape({
   username: Yup.string().required("Kullanıcı adı veya öğrenci numarası zorunludur!"),
-  password: Yup.string()
-    .min(6, "Şifre en az 6 karakter olmalıdır!")
-    .required("Şifre zorunludur!")
+  password: Yup.string().min(6, "Şifre en az 6 karakter olmalıdır!").required("Şifre zorunludur!")
 });
 
 export default function JwtLogin() {
@@ -126,7 +116,6 @@ export default function JwtLogin() {
       } else {
         navigate("/dashboard");
       }
-
     } catch (error) {
       const status = error.response?.status;
 
@@ -156,11 +145,7 @@ export default function JwtLogin() {
           <Grid item sm={5} xs={12}>
             <VisualBox>
               <Box mb={4}>
-                <img
-                  src="/assets/images/unilogo.png"
-                  width="150"
-                  alt="Logo"
-                />
+                <img src="/assets/images/unilogo.png" width="150" alt="Logo" />
               </Box>
               <Typography variant="h4" fontWeight={800} mb={1}>
                 UniClub Giriş
@@ -256,12 +241,7 @@ export default function JwtLogin() {
                     />
 
                     {/* Beni Hatırla + Şifremi Unuttum */}
-                    <Box
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="center"
-                      mb={2}
-                    >
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                       <Box display="flex" alignItems="center" gap={1}>
                         <Checkbox
                           name="remember"

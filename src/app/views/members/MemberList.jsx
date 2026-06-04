@@ -208,16 +208,6 @@ export default function MemberList() {
                             <VisibilityIcon />
                           </IconButton>
                         </Tooltip>
-
-                        <Tooltip title="Düzenle">
-                          <IconButton
-                            size="small"
-                            sx={{ color: yalovaRed }}
-                            onClick={() => navigate(`/members/edit/${m.id}`)}
-                          >
-                            <EditIcon />
-                          </IconButton>
-                        </Tooltip>
                       </Box>
                     </TableCell>
                   </StyledTableRow>

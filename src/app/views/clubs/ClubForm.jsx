@@ -21,7 +21,6 @@ import InstagramIcon from "@mui/icons-material/Instagram";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import LinkIcon from "@mui/icons-material/Link";
-import clubService from "app/services/clubService";
 
 // Yalova Üniversitesi Bordo/Kırmızı Tonu (Ana Vurgu)
 const YU_BORDO = "#8B0000";
@@ -88,6 +87,7 @@ export default function ClubForm({ initialValues, onSubmit, isEdit }) {
       reader.onerror = reject;
       reader.readAsDataURL(file);
     });
+    
 
   useEffect(() => {
     if (initialValues) {
@@ -95,6 +95,20 @@ export default function ClubForm({ initialValues, onSubmit, isEdit }) {
         ...initialValues,
         approved:
           initialValues.approved === true || initialValues.approved === "true" ? "true" : "false"
+      });
+    } else {
+      setFormData({
+        clubName: "",
+        shortName: "",
+        description: "",
+        logoUrl: "",
+        foundationDate: "",
+        email: "",
+        phone: "",
+        instagram: "",
+        approved: false,
+        status: "ACTIVE",
+        presidentId: ""
       });
     }
   }, [initialValues]);

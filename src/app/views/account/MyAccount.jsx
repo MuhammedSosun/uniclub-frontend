@@ -135,6 +135,7 @@ export default function MyAccount() {
                   value={profile.phone}
                   icon={<LocalPhoneIcon fontSize="inherit" />}
                 />
+                <InfoBox label="Yaş" value={profile.age} icon={<PersonIcon fontSize="inherit" />} />
               </Grid>
             </Card>
 

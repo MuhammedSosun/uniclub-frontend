@@ -7,6 +7,7 @@ import MatxLayout from "./components/MatxLayout/MatxLayout";
 
 import sessionRoutes from "./views/sessions/session-routes";
 import ClubRoutes from "./views/clubs";
+
 const Analytics = Loadable(lazy(() => import("app/views/dashboard/Analytics")));
 
 const MemberList = Loadable(lazy(() => import("app/views/members/MemberList")));
@@ -18,6 +19,9 @@ const About = Loadable(lazy(() => import("app/views/about")));
 const Profile = Loadable(lazy(() => import("app/views/account/Profile")));
 const MyAccount = Loadable(lazy(() => import("app/views/account/MyAccount")));
 
+const AiRecommendationsPage = Loadable(
+  lazy(() => import("app/views/AiRecommendationsPage/AiRecommendationsPage"))
+);
 const routes = [
   { path: "/", element: <Navigate to="dashboard" /> },
 
@@ -39,6 +43,7 @@ const routes = [
       { path: "my-account", element: <MyAccount /> },
       { path: "profile", element: <MyAccount /> },
       { path: "profile/edit", element: <Profile /> },
+      { path: "ai-recommendations", element: <AiRecommendationsPage /> },
 
       ...ClubRoutes
     ]
